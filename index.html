@@ -77,40 +77,28 @@
         </div>
     </div>
 
-    <script>
-        // Lógica visual do contador (Simulação para a Landing Page Estática)
+<script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Define um número base para parecer que o site já tem tráfego
-            const baseVisual = 1420; 
-            
-            // Pega as visitas locais (apenas para dar a sensação de incremento ao usuário)
-            let visitasLocais = localStorage.getItem("arena_visitas");
-            if (!visitasLocais) {
-                visitasLocais = 1;
-            } else {
-                visitasLocais = parseInt(visitasLocais) + 1;
-            }
-            localStorage.setItem("arena_visitas", visitasLocais);
-
-            // Soma o tráfego base com o do usuário
-            const totalVisitas = baseVisual + visitasLocais;
-            
-            // Formata com zeros à esquerda (ex: 001421)
-            const numeroFormatado = totalVisitas.toString().padStart(6, '0');
-            
-            // Efeito de contagem na tela
             const elementoContador = document.getElementById("contador-visitas");
-            let contagemAtual = baseVisual - 50; // Começa 50 números antes para o efeito de rolagem
             
-            const intervalo = setInterval(() => {
-                contagemAtual++;
-                elementoContador.innerText = contagemAtual.toString().padStart(6, '0');
-                
-                if (contagemAtual >= totalVisitas) {
-                    clearInterval(intervalo);
-                    elementoContador.innerText = numeroFormatado;
-                }
-            }, 30); // Velocidade da animação
+            // Efeito visual de carregando enquanto busca o número real no servidor
+            elementoContador.innerText = "LOAD..";
+
+            // Chamada para a API gratuita de contagem global
+            // O parâmetro "/up" garante que cada carregamento da página some +1 no contador oficial
+            fetch('https://api.counterapi.dev/v1/arenamatch-app-br/visitas/up')
+                .then(response => response.json())
+                .then(data => {
+                    // Extrai o número global e real de visitantes
+                    const totalVisitas = data.count;
+                    
+                    // Formata com zeros à esquerda para manter o visual digital (ex: 000001)
+                    elementoContador.innerText = totalVisitas.toString().padStart(6, '0');
+                })
+                .catch(error => {
+                    console.error('Erro de conexão com o contador:', error);
+                    elementoContador.innerText = "------";
+                });
         });
     </script>
 </body>
