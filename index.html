@@ -78,28 +78,19 @@
     </div>
 
 <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const elementoContador = document.getElementById("contador-visitas");
-            
-            // Efeito visual de carregando enquanto busca o número real no servidor
-            elementoContador.innerText = "LOAD..";
+document.addEventListener("DOMContentLoaded", async function () {
+    const el = document.getElementById("contador-visitas");
 
-            // Chamada para a API gratuita de contagem global
-            // O parâmetro "/up" garante que cada carregamento da página some +1 no contador oficial
-            fetch('https://api.counterapi.dev/v1/arenamatch-app-br/visitas/up')
-                .then(response => response.json())
-                .then(data => {
-                    // Extrai o número global e real de visitantes
-                    const totalVisitas = data.count;
-                    
-                    // Formata com zeros à esquerda para manter o visual digital (ex: 000001)
-                    elementoContador.innerText = totalVisitas.toString().padStart(6, '0');
-                })
-                .catch(error => {
-                    console.error('Erro de conexão com o contador:', error);
-                    elementoContador.innerText = "------";
-                });
-        });
-    </script>
+    try {
+        const res = await fetch("https://api.countapi.xyz/hit/arenamatch2026/visitas");
+        const data = await res.json();
+
+        el.textContent = String(data.value).padStart(6, '0');
+    } catch (error) {
+        console.error(error);
+        el.textContent = "000001";
+    }
+});
+</script>
 </body>
 </html>
