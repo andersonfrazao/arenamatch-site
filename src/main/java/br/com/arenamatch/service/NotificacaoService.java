@@ -92,6 +92,7 @@ public class NotificacaoService {
             
             boolean souMandante = p.getMandante() != null && p.getMandante().getId().equals(idTime);
             Time adversario = souMandante ? p.getVisitante() : p.getMandante();
+            Time donoDoCampo = definirDonoDoCampo(p);
             
             String nomeAdversario = adversario.getNome();
             String prefixo = fuiEuQueEnviei ? "Enviado para: " : "Recebido de: ";
@@ -99,10 +100,23 @@ public class NotificacaoService {
             
             dto.setSubtitulo(prefixo + nomeAdversario + " — " + dataHoraFormatada);
             dto.setDataCriacao(p.getDataSolicitacao());
+            dto.setValorTaxa(donoDoCampo != null ? donoDoCampo.getValorTaxa() : null);
             
             lista.add(dto);
         }
         return lista;
+    }
+
+    private Time definirDonoDoCampo(Partida partida) {
+        if (partida.getMandante() != null && partida.getMandante().isMandoCampo()) {
+            return partida.getMandante();
+        }
+
+        if (partida.getVisitante() != null && partida.getVisitante().isMandoCampo()) {
+            return partida.getVisitante();
+        }
+
+        return partida.getMandante();
     }
 
     private List<NotificacaoDTO> buscarNotificacoesFisicas(Long idTime) {

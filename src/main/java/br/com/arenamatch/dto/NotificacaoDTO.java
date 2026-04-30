@@ -13,4 +13,5 @@ public class NotificacaoDTO {
  private String subtitulo; // Ex: "Qui 20:00–22:00" ou "convite para entrar"
  private boolean enviadoPorMim;
  private LocalDateTime dataCriacao;
+ private Double valorTaxa;
 }

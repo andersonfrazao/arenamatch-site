@@ -91,12 +91,12 @@ public class AgendaService {
         Time adversario = souMandante ? p.getVisitante() : p.getMandante();
         Time meuTime = souMandante ? p.getMandante() : p.getVisitante(); 
 
-        Time donoDoCampo = p.getMandante();
+        Time donoDoCampo = definirDonoDoCampo(p);
                 
         dto.setIdTimeAdversario(adversario.getId());
         dto.setCidade(adversario.getCidade());
         dto.setValorTaxa(donoDoCampo.getValorTaxa()); 
-        dto.setTemCampo(adversario.isMandoCampo()); 
+        dto.setTemCampo(donoDoCampo != null && donoDoCampo.getId().equals(meuTimeId)); 
         
         // Tratamento do Endereço (Mantido)
         List<String> partes = new ArrayList<>();
@@ -157,6 +157,18 @@ public class AgendaService {
     }
 
     // Função auxiliar matemática
+    private Time definirDonoDoCampo(Partida partida) {
+        if (partida.getMandante() != null && partida.getMandante().isMandoCampo()) {
+            return partida.getMandante();
+        }
+
+        if (partida.getVisitante() != null && partida.getVisitante().isMandoCampo()) {
+            return partida.getVisitante();
+        }
+
+        return partida.getMandante();
+    }
+
     private double calcularDistancia(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // Raio da Terra em Km
         double latDistance = Math.toRadians(lat2 - lat1);

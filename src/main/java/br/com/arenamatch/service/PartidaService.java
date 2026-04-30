@@ -156,8 +156,11 @@ public class PartidaService {
         // ==========================================
 
         Partida partida = new Partida();
-        partida.setVisitante(desafiante);
-        partida.setMandante(desafiado);
+        Time mandante = definirMandante(desafiante, desafiado);
+        Time visitante = mandante.getId().equals(desafiante.getId()) ? desafiado : desafiante;
+
+        partida.setMandante(mandante);
+        partida.setVisitante(visitante);
         partida.setStatus(StatusPartida.PENDENTE);
         partida.setDataHora(dto.getDataHoraPartida()); 
         partida.setDataSolicitacao(LocalDateTime.now()); 
@@ -198,6 +201,18 @@ public class PartidaService {
         }
 
         return dto;
+    }
+    
+    private Time definirMandante(Time desafiante, Time desafiado) {
+        if (desafiante.isMandoCampo() && !desafiado.isMandoCampo()) {
+            return desafiante;
+        }
+
+        if (desafiado.isMandoCampo() && !desafiante.isMandoCampo()) {
+            return desafiado;
+        }
+
+        return desafiado;
     }
     
     @Transactional

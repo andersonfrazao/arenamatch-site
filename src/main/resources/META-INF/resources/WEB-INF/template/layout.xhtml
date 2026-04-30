@@ -63,6 +63,8 @@
             display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 90; flex-wrap: wrap; gap: 1rem;
         }
 
+        .am-mobile-team { display: none; }
+
         .am-content-area { padding: 2rem; flex-grow: 1; }
 
         /* NOVAS CLASSES DO PROTÓTIPO (NOTIFICAÇÕES) */
@@ -99,7 +101,22 @@
             .am-layout { grid-template-columns: 1fr; }
             .am-sidebar { display: none; }
             .am-content-area { padding: 1rem; padding-bottom: 6rem; }
-            .am-topbar { flex-direction: column; align-items: flex-start; }
+            .am-topbar { flex-direction: column; align-items: flex-start; padding: 1rem; gap: .75rem; }
+            .am-mobile-team {
+                display: flex; align-items: center; gap: .7rem; width: 100%; max-width: 100%;
+                padding: .65rem .75rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.10);
+                background: rgba(0,0,0,0.18);
+            }
+            .am-mobile-team-icon {
+                width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.35);
+                color: #38bdf8;
+            }
+            .am-mobile-team-text { min-width: 0; flex: 1; }
+            .am-mobile-team-text div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .am-topbar > .flex-grow-1, .am-topbar > .flex { width: 100%; }
+            .am-topbar > .flex { justify-content: flex-start; }
             .am-bottom-nav {
                 display: flex; position: fixed; left: 0; right: 0; bottom: 0;
                 background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);
@@ -204,6 +221,13 @@
                         <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 4px;">
                             <ui:insert name="subtituloPagina">Seu painel de controle esportivo</ui:insert>
                         </div>
+                        <div class="am-mobile-team">
+                            <div class="am-mobile-team-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="am-mobile-team-text">
+                                <div class="font-bold text-white text-sm">#{sessaoBean.usuarioLogado.nome}</div>
+                                <div class="font-bold text-xs" style="color: #38bdf8;">#{dashboardBean.time.nome}</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex align-items-center gap-2 flex-wrap">
@@ -271,6 +295,16 @@
                                         </h:panelGroup>
 
                                         <div style="color: rgba(255,255,255,0.65); font-size: 0.9rem;">#{notif.subtitulo}</div>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'JOGO' and notif.valorTaxa ne null and notif.valorTaxa gt 0}" layout="block" styleClass="mt-2">
+                                            <span class="bg-bluegray-800 px-2 py-1 border-round text-green-400 font-bold text-xs shadow-1">
+                                                <i class="fas fa-money-bill-wave mr-1"></i>
+                                                Taxa:
+                                                <h:outputText value="#{notif.valorTaxa}">
+                                                    <f:convertNumber type="currency" currencySymbol="R$" locale="pt_BR"/>
+                                                </h:outputText>
+                                            </span>
+                                        </h:panelGroup>
                                         
                                         <div class="text-xs text-gray-400 mt-1 font-italic">
                                             <i class="fas fa-clock mr-1"></i>
@@ -362,12 +396,22 @@
         
         <script>
             // Lógica para abrir/fechar o painel de notificações
-            const bellBtn = document.getElementById("amBellBtn");
-            const notifPanel = document.getElementById("amNotifPanel");
-            if(bellBtn){
-                bellBtn.addEventListener("click", () => {
+            if (!window.amNotifClickBound) {
+                window.amNotifClickBound = true;
+
+                document.addEventListener("click", function(event) {
+                    const bellBtn = event.target.closest("#amBellBtn");
+                    if (!bellBtn) {
+                        return;
+                    }
+
+                    const notifPanel = document.getElementById("amNotifPanel");
+                    if (!notifPanel) {
+                        return;
+                    }
+
                     notifPanel.classList.toggle("open");
-                    if(notifPanel.classList.contains("open")){
+                    if (notifPanel.classList.contains("open")) {
                         notifPanel.scrollIntoView({ behavior: "smooth", block: "start" });
                     }
                 });
