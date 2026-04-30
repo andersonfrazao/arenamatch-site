@@ -1,0 +1,454 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template/layout.xhtml">
+
+    <ui:define name="conteudo">
+        
+        <style>
+            /* --- ESTILOS GERAIS --- */
+            .wizard-card {
+                background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;
+                width: 95%; max-width: 900px; overflow: hidden; margin: 20px auto; position: relative;
+            }
+            .wizard-card::before {
+                content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+                background: linear-gradient(90deg, #0ea5e9, #22c55e); z-index: 10;
+            }
+
+            /* Header e Steps */
+            .wizard-header { background: rgba(15, 23, 42, 0.95); padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .steps-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
+            .step-line { width: 30px; height: 2px; background: #334155; }
+            
+            /* Inputs Customizados */
+            .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .full-width { grid-column: span 2; }
+            .form-group { margin-bottom: 5px; }
+            .form-label { display: block; color: #94a3b8; font-size: 0.85rem; margin-bottom: 6px; font-weight: 600; }
+            .info-box {
+                background: rgba(14, 165, 233, 0.1); border-left: 4px solid #0ea5e9;
+                padding: 15px; border-radius: 4px; color: #e2e8f0; font-size: 0.85rem;
+                margin-bottom: 20px; display: flex; gap: 10px; align-items: start; line-height: 1.4;
+            }
+            
+            body .custom-input, body .ui-inputfield.custom-input {
+                width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.6) !important;
+                border: 1px solid #475569 !important; border-radius: 8px !important;
+                color: #fff !important; font-size: 0.95rem; box-shadow: none !important;
+            }
+            
+            /* CSS para ERRO DE VALIDAÇÃO (Borda Vermelha) */
+            body .ui-inputfield.ui-state-error, 
+            body .ui-inputfield.custom-input.ui-state-error {
+                border-color: #ef4444 !important;
+                box-shadow: 0 0 0 1px #ef4444 !important;
+            }
+
+            /* Campo Readonly */
+            body .ui-inputfield.custom-input[readonly] { 
+                background: rgba(15, 23, 42, 0.9) !important; color: #64748b !important; opacity: 1 !important;
+            }
+
+            /* Estilos dos Botões de Dias */
+            body .week-selector .ui-selectonebutton { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
+            body .week-selector .ui-button {
+                flex: 1; min-width: 45px; height: 45px; border-radius: 8px !important;
+                background: #1e293b !important; border: 1px solid #475569 !important; color: #94a3b8 !important;
+                font-weight: bold; font-size: 0.8rem; box-shadow: none !important;
+            }
+            body .week-selector .ui-button.ui-state-active {
+                background: #0ea5e9 !important; color: #fff !important; border-color: #0ea5e9 !important;
+            }
+            body .week-selector .ui-button:hover { border-color: #0ea5e9 !important; color: #fff !important; }
+            
+            /* Ajustes Mobile */
+            @media (max-width: 600px) { .input-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+            .ui-wizard-navbar { display: none; }
+        </style>
+
+        <h:form id="formCadastro">
+            <p:growl id="msgs" showDetail="true" life="5000" />
+
+            <div class="wizard-card">
+                
+                <h:panelGroup id="wizardHeader" layout="block" styleClass="wizard-header">
+                    <div class="steps-container">
+                        <div class="step-item #{cadastroBean.stepAtual == 'responsavel' ? 'active' : ''}" style="display: flex; align-items: center; gap: 10px; opacity: #{cadastroBean.stepAtual == 'responsavel' ? '1' : '0.4'};">
+                            <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #{cadastroBean.stepAtual == 'responsavel' ? '#0ea5e9' : '#334155'}; color: #fff; display: flex; align-items: center; justify-content: center;">1</div>
+                            <span class="step-label" style="color:#fff; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Representante</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-item #{cadastroBean.stepAtual == 'time' ? 'active' : ''}" style="display: flex; align-items: center; gap: 10px; opacity: #{cadastroBean.stepAtual == 'time' ? '1' : '0.4'};">
+                            <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #{cadastroBean.stepAtual == 'time' ? '#0ea5e9' : '#334155'}; color: #fff; display: flex; align-items: center; justify-content: center;">2</div>
+                            <span class="step-label" style="color:#fff; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Time</span>
+                        </div>
+                         <div class="step-line"></div>
+                        <div class="step-item #{cadastroBean.stepAtual == 'agenda' ? 'active' : ''}" style="display: flex; align-items: center; gap: 10px; opacity: #{cadastroBean.stepAtual == 'agenda' ? '1' : '0.4'};">
+                            <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #{cadastroBean.stepAtual == 'agenda' ? '#0ea5e9' : '#334155'}; color: #fff; display: flex; align-items: center; justify-content: center;">3</div>
+                            <span class="step-label" style="color:#fff; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Agenda</span>
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+                <div style="padding: 30px 40px; min-height: 400px;">
+                    <p:wizard flowListener="#{cadastroBean.onFlowProcess}" showNavBar="false" widgetVar="wiz">
+                        <p:ajax event="next" update=":formCadastro:wizardHeader :formCadastro:wizardFooter msgs"/>
+                        <p:ajax event="back" update=":formCadastro:wizardHeader :formCadastro:wizardFooter"/>
+
+                        <p:tab id="responsavel">
+                            <h2 style="margin-top: 0; color: #fff; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-user-tie" style="color: #0ea5e9;"></i> Responsável
+                            </h2>
+                            <div class="input-grid">
+                                <div class="form-group full-width">
+                                    <label class="form-label">Nome Completo</label>
+                                    <p:inputText value="#{cadastroBean.dto.nomeResponsavel}" styleClass="custom-input" required="true" requiredMessage="Nome é obrigatório"/>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">CPF</label>
+                                    <p:inputMask value="#{cadastroBean.dto.cpf}" 
+                                                 mask="999.999.999-99" 
+                                                 styleClass="custom-input" 
+                                                 required="true" 
+                                                 requiredMessage="CPF é obrigatório"
+                                                 disabled="#{sessaoBean.logado}" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Celular</label>
+                                    <p:inputMask value="#{cadastroBean.dto.celular}" mask="(99) 99999-9999" styleClass="custom-input" required="true" requiredMessage="Celular é obrigatório"/>
+                                </div>
+                                <div class="form-group full-width">
+                                    <p:outputLabel for="email" value="E-mail" styleClass="text-gray-300 font-bold mb-2 block"/>
+                                    <p:inputText id="email" value="#{cadastroBean.dto.email}" 
+                                                 styleClass="w-full custom-input" 
+                                                 required="true" 
+                                                 requiredMessage="E-mail é obrigatório"
+                                                 disabled="#{sessaoBean.logado}"/>  
+                                </div>
+
+                                <h:panelGroup rendered="#{not sessaoBean.logado}">
+                                    <div class="field col-12 md:col-6">
+                                        <p:outputLabel for="senha" value="Senha *" styleClass="text-gray-300 font-bold mb-2 block"/>
+                                        <p:password id="senha" value="#{cadastroBean.dto.senha}" 
+                                                    styleClass="w-full custom-input" 
+                                                    required="true" requiredMessage="A senha é obrigatória"
+                                                    feedback="true" promptLabel="Digite uma senha" weakLabel="Fraca" goodLabel="Boa" strongLabel="Forte"/>
+                                    </div>
+                                    <div class="field col-12 md:col-6">
+                                        <p:outputLabel for="confirmaSenha" value="Confirmar Senha *" styleClass="text-gray-300 font-bold mb-2 block"/>
+                                        <p:password id="confirmaSenha" value="#{cadastroBean.confirmarSenha}" 
+                                                    styleClass="w-full custom-input" 
+                                                    required="true" requiredMessage="A confirmação de senha é obrigatória"/>
+                                    </div>
+                                </h:panelGroup>
+                            </div>
+                        </p:tab>
+
+                        <p:tab id="time">
+                            <h2 style="margin-top: 0; color: #fff; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-shield-alt" style="color: #0ea5e9;"></i> Time e Local
+                            </h2>
+
+                            <div class="input-grid">
+                                <div class="form-group full-width">
+                                    <div class="upload-area">
+                                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; margin-bottom: 10px;"></i><br/>
+                                        Clique para enviar o Escudo do Time
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label class="form-label">Nome do Time</label>
+                                    <p:inputText value="#{cadastroBean.dto.nomeTime}" styleClass="custom-input" 
+                                                 required="true" 
+                                                 requiredMessage="Por favor, informe o Nome do Time."
+                                                 placeholder="Ex: Tabajara FC"/>
+                                </div>
+
+                                <div class="full-width info-box">
+                                    <i class="fas fa-info-circle" style="font-size: 1.2rem; margin-top:2px;"></i>
+                                    <div>
+                                        <strong>Dica de Localização:</strong><br/>
+                                        Mesmo que o time não tenha uma "casa" fixa, coloque um CEP aproximado da região onde costumam jogar. Isso é essencial para aparecer nas buscas de proximidade!
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label class="form-label">CEP</label>
+                                    <div style="display:flex; gap:10px;">
+                                        <p:inputMask id="inputCep" value="#{cadastroBean.dto.cep}" mask="99999-999" 
+                                                     styleClass="custom-input" 
+                                                     required="true" 
+                                                     requiredMessage="O CEP é obrigatório."
+                                                     placeholder="00000-000"/>
+                                        <p:commandButton icon="fas fa-search" action="#{cadastroBean.buscarCep}" 
+                                                         process="@this inputCep" update="painelEndereco msgs"
+                                                         style="background:#334155; border:1px solid #475569; color:#fff; border-radius:8px; width:50px; height: 46px"/>
+                                    </div>
+                                </div>
+
+                                <h:panelGroup id="painelEndereco" layout="block" styleClass="input-grid full-width p-0 gap-0" style="display: contents;">
+                                    <div class="form-group full-width">
+                                        <label class="form-label">Logradouro</label>
+                                        <p:inputText value="#{cadastroBean.dto.logradouro}" styleClass="custom-input" 
+                                                     readonly="true"
+                                                     required="true"
+                                                     requiredMessage="O endereço é obrigatório (busque pelo CEP)."/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Número <span style="font-weight:normal; opacity:0.6">(Opcional)</span></label>
+                                        <p:inputText value="#{cadastroBean.dto.numero}" styleClass="custom-input" placeholder="S/N"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Complemento <span style="font-weight:normal; opacity:0.6">(Opcional)</span></label>
+                                        <p:inputText value="#{cadastroBean.dto.complemento}" styleClass="custom-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Bairro</label>
+                                        <p:inputText value="#{cadastroBean.dto.bairro}" styleClass="custom-input" 
+                                                     readonly="true"
+                                                     required="true"
+                                                     requiredMessage="O bairro é obrigatório."/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Região</label>
+                                        <p:inputText value="#{cadastroBean.dto.regiao}" styleClass="custom-input" readonly="true"/>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label">Cidade / UF</label>
+                                        <p:inputText value="#{cadastroBean.dto.cidade} - #{cadastroBean.dto.uf}" styleClass="custom-input" 
+                                                     readonly="true"
+                                                     required="true"
+                                                     requiredMessage="Cidade e UF são obrigatórios."/>
+                                    </div>
+                                </h:panelGroup>
+
+                                <div class="form-group full-width">
+                                    <label class="form-label">Mando de Campo</label>
+                                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid #334155;">
+                                        <p:selectOneRadio value="#{cadastroBean.dto.mandoCampo}" unselectable="true" style="color:#fff;"
+                                                          required="true" requiredMessage="Selecione se é Mandante ou Visitante.">
+                                            <f:selectItem itemValue="true" itemLabel="Mandante" />
+                                            <f:selectItem itemValue="false" itemLabel="Visitante" />
+                                            <p:ajax update="painelTaxa" event="valueChange" />
+                                        </p:selectOneRadio>
+                                    </div>
+                                </div>
+                                
+                                <h:panelGroup id="painelTaxa" layout="block">
+                                    <h:panelGroup rendered="#{cadastroBean.dto.mandoCampo eq 'true'}" layout="block" styleClass="form-group full-width mt-3">
+                                        <label class="form-label" style="color: #4ade80;">Valor da Taxa / Racha</label>
+                                        <div class="ui-inputgroup">
+                                            <span class="ui-inputgroup-addon" style="background: #334155; border: none; color: #fff;">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            </span>
+                                            <p:inputNumber value="#{cadastroBean.dto.valorTaxa}" 
+                                                           symbol="R$ " symbolPosition="p" 
+                                                           decimalSeparator="," thousandSeparator="."
+                                                           placeholder="0,00"
+                                                           styleClass="w-full" 
+                                                           inputStyleClass="w-full custom-input" 
+                                                           style="width: 100%;"/>
+                                        </div>
+                                        <small style="color: #94a3b8; display: block; margin-top: 5px;">
+                                            Informe o valor cobrado por jogo. Deixe 0,00 se for grátis.
+                                        </small>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </div>
+                        </p:tab>
+
+                        <p:tab id="agenda">
+                            <h2 style="margin-top: 0; color: #fff; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                                <i class="far fa-calendar-alt" style="color: #0ea5e9;"></i> Disponibilidade
+                            </h2>
+
+                            <h:panelGroup id="painelAgenda" layout="block" style="background: rgba(15, 23, 42, 0.4); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                <div class="input-grid">
+                                    <div class="form-group full-width">
+                                        <label class="form-label">1. Categoria</label>
+                                        <h:selectOneMenu value="#{cadastroBean.tempCategoria}" styleClass="custom-input">
+                                            <f:selectItem itemLabel="Selecione a categoria..." noSelectionOption="true"/>
+                                            <f:selectItems value="#{cadastroBean.categorias}" var="c" itemLabel="#{c.descricao}" itemValue="#{c}"/>
+                                        </h:selectOneMenu>
+                                    </div>
+
+                                    <div class="form-group full-width week-selector">
+                                        <label class="form-label">2. Dia da Semana</label>
+                                        <p:selectOneButton value="#{cadastroBean.tempDia}" unselectable="false">
+                                            <f:selectItem itemLabel="SEG" itemValue="Segunda"/>
+                                            <f:selectItem itemLabel="TER" itemValue="Terça"/>
+                                            <f:selectItem itemLabel="QUA" itemValue="Quarta"/>
+                                            <f:selectItem itemLabel="QUI" itemValue="Quinta"/>
+                                            <f:selectItem itemLabel="SEX" itemValue="Sexta"/>
+                                            <f:selectItem itemLabel="SÁB" itemValue="Sábado"/>
+                                            <f:selectItem itemLabel="DOM" itemValue="Domingo"/>
+                                        </p:selectOneButton>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Início</label>
+                                        <p:inputMask value="#{cadastroBean.tempInicio}" mask="99:99" styleClass="custom-input"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Fim</label>
+                                        <p:inputMask value="#{cadastroBean.tempFim}" mask="99:99" styleClass="custom-input"/>
+                                    </div>
+                                </div>
+                                
+                                <p:commandButton value="ADICIONAR HORÁRIO" action="#{cadastroBean.adicionarHorario}" 
+                                                 update="painelAgenda tabelaAgenda msgs" process="painelAgenda"
+                                                 styleClass="btn-add" 
+                                                 style="width: 100%; background: #0ea5e9; color: #fff; border: none; padding: 10px; margin-top: 15px;"/>
+                            </h:panelGroup>
+
+                            <div style="margin-top: 30px;">
+                                <h3 style="color:#fff; font-size: 1rem; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+                                    Horários Configurados
+                                </h3>
+                                
+                                <p:dataTable id="tabelaAgenda" value="#{cadastroBean.agenda}" var="item" 
+                                             emptyMessage="Nenhum horário adicionado ainda."
+                                             styleClass="agenda-table-prime"
+                                             rowStyleClass="bg-transparent text-white">
+                                    
+                                    <p:column headerText="Categoria" style="background:transparent; color:#fff; border-color:#334155">
+                                        <h:outputText value="#{item.categoria.descricao}" style="font-weight:bold"/>
+                                    </p:column>
+                                    <p:column headerText="Dia" style="background:transparent; color:#0ea5e9; border-color:#334155">
+                                        <h:outputText value="#{item.diaSemana}"/>
+                                    </p:column>
+                                    <p:column headerText="Horário" style="background:transparent; color:#cbd5e1; border-color:#334155">
+                                        <h:outputText value="#{item.inicio} - #{item.fim}"/>
+                                    </p:column>
+                                    <p:column style="background:transparent; border-color:#334155; text-align:right; width:50px">
+                                        <p:commandButton icon="fas fa-trash" action="#{cadastroBean.removerHorario(item)}" 
+                                                         update="tabelaAgenda" process="@this"
+                                                         style="background:transparent; color:#ef4444; border:1px solid #ef4444"
+                                                         styleClass="rounded-button ui-button-flat"/>
+                                    </p:column>
+                                </p:dataTable>
+                            </div>
+
+                            <h:panelGroup rendered="#{not sessaoBean.logado}" layout="block" styleClass="field mb-4 flex align-items-center mt-4 p-3 border-round-lg" style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255,255,255,0.1);">
+                                
+                                <p:selectBooleanCheckbox id="aceiteTermos" value="#{cadastroBean.dto.termosAceitos}" widgetVar="chkTermos" style="pointer-events: none;" />
+                                
+                                <p:outputLabel styleClass="ml-3 text-gray-300 text-sm">
+                                    Para continuar, você precisa ler e aceitar os <p:commandLink value="Termos e Condições de Uso" type="button" onclick="abrirTermos();" styleClass="text-blue-400 font-bold no-underline hover:underline"/>
+                                </p:outputLabel>
+                            </h:panelGroup>
+
+                            <p:commandButton value="#{sessaoBean.logado ? 'Atualizar os dados' : 'Finalizar Cadastro'}" 
+                                             action="#{cadastroBean.finalizar}" 
+                                             update="@form" 
+                                             icon="fas #{sessaoBean.logado ? 'fa-sync-alt' : 'fa-check'}" 
+                                             styleClass="mt-3"
+                                             style="background: #0ea5e9; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%;" />
+                                             
+                        </p:tab>
+                    </p:wizard>
+                </div>
+                
+                <h:panelGroup id="wizardFooter" layout="block" 
+                              style="padding: 20px 40px; background: rgba(15, 23, 42, 0.6); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between;">
+                    
+                    <p:commandButton value="Voltar" onclick="PF('wiz').back()" type="button" 
+                                     rendered="#{cadastroBean.stepAtual != 'responsavel'}"
+                                     style="background: transparent; color: #94a3b8; border: 1px solid #475569; padding: 8px 20px; border-radius: 8px; font-weight: bold;"/>
+                    
+                    <h:panelGroup rendered="#{cadastroBean.stepAtual == 'responsavel'}" style="width: 10px;"/>
+                
+                    <p:commandButton value="Próximo" onclick="PF('wiz').next()" type="button" 
+                                         rendered="#{cadastroBean.stepAtual != 'agenda'}"
+                                         style="background: #0ea5e9; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold;"/>
+                                     
+                </h:panelGroup>
+            </div>
+
+			<p:dialog header="Termos e Condições de Uso" widgetVar="dialogTermos" modal="true" width="90%" fitViewport="true" responsive="true" style="max-width: 600px;" styleClass="bg-bluegray-900 text-white shadow-6 border-round-xl" closable="false">
+                
+                <div id="boxTextosTermo" onscroll="verificarScrollTermos()" style="max-height: 55vh; overflow-y: auto; padding-right: 10px;" class="line-height-3 text-gray-300 text-sm font-family-sans">
+                    <div style="background: rgba(14, 165, 233, 0.1); border-left: 4px solid #0ea5e9; padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #e2e8f0;">
+                        <i class="fas fa-info-circle mr-2"></i> Role o texto até o final para habilitar o botão de aceite.
+                    </div>
+
+                    <h4 class="text-white font-bold mb-2">1. Aceitação dos Termos e Natureza do Serviço</h4>
+                    <p class="mb-3">Bem-vindo ao Arena Match. Este serviço é operado pela <strong>JCS Info LTDA ME</strong>, inscrita no CNPJ sob o nº <strong>[COLOQUE SEU CNPJ AQUI]</strong>. Ao criar sua conta, você concorda expressamente com as regras descritas neste documento.</p>
+
+                    <h4 class="text-white font-bold mb-2">2. Fase Beta e Limitações do Sistema</h4>
+                    <p class="mb-3">O Arena Match encontra-se atualmente em fase "Beta" (versão de testes). Isso significa que a plataforma está em constante desenvolvimento e pode apresentar instabilidades, lentidão ou funções temporariamente indisponíveis. A <strong>JCS Info LTDA ME</strong> não garante a disponibilidade ininterrupta do serviço nesta fase.</p>
+
+                    <h4 class="text-white font-bold mb-2">3. Isenção de Responsabilidade (O Risco do Jogo)</h4>
+                    <p class="mb-3">O Arena Match atua exclusivamente como uma ferramenta tecnológica de comunicação e agendamento. Atualmente, <strong>não possuímos um sistema de reputação, verificação de identidade ou avaliação técnica e comportamental dos times cadastrados</strong>. A decisão de agendar e comparecer a uma partida é de inteira responsabilidade dos representantes das equipes envolvidas. A <strong>JCS Info LTDA ME</strong> está isenta de qualquer responsabilidade por acidentes, lesões, desentendimentos, não comparecimento (W.O.), inadimplência de taxas de campo ou qualquer dano moral ou material ocorrido antes, durante ou após os eventos esportivos agendados pela plataforma.</p>
+
+                    <h4 class="text-white font-bold mb-2">4. Alterações e Futura Monetização</h4>
+                    <p class="mb-3">Nesta fase Beta, o acesso às ferramentas básicas de agendamento é concedido de forma gratuita. No entanto, a <strong>JCS Info LTDA ME</strong> reserva-se o direito de, no futuro e mediante aviso prévio, introduzir planos de assinatura, taxas de serviço ou alterar as funcionalidades gratuitas para modelos pagos. O usuário será notificado e poderá optar por continuar ou encerrar sua conta quando a política de preços for implementada.</p>
+                    
+                    <h4 class="text-white font-bold mb-2">5. Conduta e Banimento</h4>
+                    <p>Ao utilizar nosso chat e sistema de convites, o usuário compromete-se a manter uma postura respeitosa. É estritamente proibido o uso de linguagem abusiva, ameaças ou organização de atividades ilícitas. O descumprimento resultará no banimento imediato e permanente da conta, sem aviso prévio por parte da <strong>JCS Info LTDA ME</strong>.</p>
+                    
+                    <br/><br/><br/>
+                    <div class="text-center text-gray-500 italic">Fim do documento.</div>
+                </div>
+                
+                <f:facet name="footer">
+                    <div class="flex justify-content-between p-2 border-top-1 border-white-alpha-10 mt-2">
+                        <p:commandButton value="Cancelar" type="button" onclick="PF('dialogTermos').hide();" styleClass="ui-button-secondary font-bold rounded-btn"/>
+                        
+                        <p:commandButton widgetVar="btnAceitar" value="Eu Li e Aceito" type="button" onclick="confirmarAceite();" disabled="true" styleClass="ui-button-success font-bold rounded-btn" icon="fas fa-check"/>
+                    </div>
+                </f:facet>
+            </p:dialog>
+
+            <script>
+                function abrirTermos() {
+                    document.getElementById('boxTextosTermo').scrollTop = 0;
+                    PF('btnAceitar').disable();
+                    PF('dialogTermos').show();
+                }
+
+                function verificarScrollTermos() {
+                    var caixa = document.getElementById('boxTextosTermo');
+                    // Aumentei a tolerância de -2 para -10 pixels, caso a pessoa use Zoom no navegador
+                    if (caixa.scrollTop + caixa.clientHeight >= caixa.scrollHeight - 10) {
+                        PF('btnAceitar').enable(); 
+                    }
+                }
+
+                function confirmarAceite() {
+                    PF('chkTermos').check();
+                    PF('dialogTermos').hide();
+                }
+            </script>
+
+            <script>
+                function abrirTermos() {
+                    // Reseta o scroll e o botão toda vez que abrir
+                    document.getElementById('boxTextosTermo').scrollTop = 0;
+                    PF('btnAceitar').disable();
+                    PF('dialogTermos').show();
+                }
+
+                function verificarScrollTermos() {
+                    var caixa = document.getElementById('boxTextosTermo');
+                    // Verifica se o scroll atingiu o final (dando uma margem de segurança de 2 pixels)
+                    if (caixa.scrollTop + caixa.clientHeight >= caixa.scrollHeight - 2) {
+                        PF('btnAceitar').enable(); // Liga o botão verde!
+                    }
+                }
+
+                function confirmarAceite() {
+                    // Marca a caixinha de forma invisível via JavaScript do PrimeFaces
+                    PF('chkTermos').check();
+                    PF('dialogTermos').hide();
+                }
+            </script>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,130 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/layout.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{gerenciarLigaBean.ligaId}" />
+        <f:viewAction action="#{gerenciarLigaBean.carregarLiga}" />
+    </f:metadata>
+
+    <ui:define name="conteudo">
+        <h:form id="formGerenciarLiga">
+            <p:growl id="msgs" showDetail="true" life="4000"/>
+            
+            <div class="flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="text-white text-2xl font-bold m-0"><i class="fas fa-crown text-neon mr-2"></i> #{gerenciarLigaBean.ligaAtual.nome}</h1>
+                    <div class="text-gray-400 text-sm mt-1">Gestão da Comunidade</div>
+                </div>
+                <p:button outcome="/minhas-ligas" value="Voltar" icon="fas fa-arrow-left" styleClass="ui-button-secondary rounded-btn text-sm"/>
+            </div>
+
+            <div class="grid">
+                
+                <div class="col-12 md:col-7">
+                    <div class="bg-bluegray-900 p-4 border-round-xl shadow-4 h-full" style="border: 1px solid rgba(255,255,255,0.1);">
+                        <h2 class="text-white text-lg m-0 mb-4"><i class="fas fa-users text-gray-400 mr-2"></i> Membros do Grupo (#{gerenciarLigaBean.ligaAtual.times.size()})</h2>
+                        
+                        <p:dataTable value="#{gerenciarLigaBean.ligaAtual.times}" var="membro" 
+                                     styleClass="ui-datatable-sm bg-transparent" emptyMessage="Nenhum time na liga.">
+                            
+                            <p:column headerText="Time" styleClass="bg-transparent text-white border-bottom-1 border-gray-700">
+                                <i class="fas fa-shield-alt text-gray-400 mr-2"></i> <strong>#{membro.nome}</strong>
+                            </p:column>
+                            
+                            <p:column headerText="Papel" styleClass="bg-transparent text-white border-bottom-1 border-gray-700 text-center" width="100">
+                                <h:panelGroup rendered="#{membro.id == gerenciarLigaBean.ligaAtual.admin.id}">
+                                    <span class="text-green-400 text-xs font-bold bg-green-900 px-2 py-1 border-round">Admin</span>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{membro.id != gerenciarLigaBean.ligaAtual.admin.id}">
+                                    <span class="text-blue-300 text-xs font-bold">Membro</span>
+                                </h:panelGroup>
+                            </p:column>
+
+                            <p:column width="50" styleClass="bg-transparent border-bottom-1 border-gray-700 text-right">
+                                 <p:commandButton icon="fas fa-trash" action="#{gerenciarLigaBean.removerMembro(membro)}"
+                                                  update="formGerenciarLiga:msgs formGerenciarLiga"
+                                                  rendered="#{membro.id != gerenciarLigaBean.ligaAtual.admin.id}"
+                                                  styleClass="ui-button-danger ui-button-flat ui-button-sm p-0"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-5">
+                    <div class="bg-bluegray-900 p-4 border-round-xl shadow-4 h-full" style="border: 1px solid rgba(168, 85, 247, 0.3); border-top: 4px solid #a855f7;">
+                        <h2 class="text-purple-300 text-lg m-0 mb-3"><i class="fas fa-user-plus mr-2"></i> Adicionar ao Grupo</h2>
+                        <div class="text-gray-400 text-sm mb-3">Pesquise pelo nome do time adversário para enviar um convite.</div>
+                        
+                        <div class="flex gap-2 mb-4">
+                            <p:inputText value="#{gerenciarLigaBean.termoBusca}" placeholder="Ex: Tabajara FC" styleClass="w-full custom-input text-sm"/>
+								<p:commandButton icon="fas fa-search" action="#{gerenciarLigaBean.buscarTimesParaConvidar}" 
+                 					update="@form" 
+                 						styleClass="ui-button-help font-bold shadow-3"/>
+                        </div>
+
+						<h:panelGroup id="painelResultados">
+								<ui:repeat value="#{gerenciarLigaBean.resultadosBusca}" var="timeBuscado">
+								    
+								    <h:panelGroup rendered="#{empty gerenciarLigaBean.timeSelecionadoParaConvite or gerenciarLigaBean.timeSelecionadoParaConvite.id ne timeBuscado.id}">
+								        <div class="flex justify-content-between align-items-center p-2 mb-2 bg-black-alpha-20 border-round">
+								            
+								            <div class="text-white font-bold text-sm">#{timeBuscado.nome}</div>
+								
+								            <h:panelGroup rendered="#{gerenciarLigaBean.jaEhMembro(timeBuscado.id)}">
+								                <span class="text-green-400 font-bold text-xs bg-green-900 px-2 py-1 border-round border-1 border-green-700">
+								                    <i class="fas fa-check-circle mr-1"></i> Membro
+								                </span>
+								            </h:panelGroup>
+								
+								            <h:panelGroup rendered="#{not gerenciarLigaBean.jaEhMembro(timeBuscado.id) and gerenciarLigaBean.jaFoiConvidado(timeBuscado.id)}">
+								                <span class="text-yellow-500 font-bold text-xs bg-yellow-900 px-2 py-1 border-round border-1 border-yellow-700">
+								                    <i class="fas fa-clock mr-1"></i> Convite Enviado
+								                </span>
+								            </h:panelGroup>
+								
+								            <h:panelGroup rendered="#{not gerenciarLigaBean.jaEhMembro(timeBuscado.id) and not gerenciarLigaBean.jaFoiConvidado(timeBuscado.id)}">
+								                <p:commandButton value="Convidar" icon="fas fa-envelope" 
+								                                 action="#{gerenciarLigaBean.prepararConvite(timeBuscado)}"
+								                                 update="formGerenciarLiga:painelResultados"
+								                                 styleClass="ui-button-help ui-button-flat ui-button-sm p-1 text-xs font-bold"/>
+								            </h:panelGroup>
+								        </div>
+								    </h:panelGroup>
+								
+								    <h:panelGroup rendered="#{not empty gerenciarLigaBean.timeSelecionadoParaConvite and gerenciarLigaBean.timeSelecionadoParaConvite.id eq timeBuscado.id}">
+								        <div class="p-3 mb-2 bg-purple-900 border-round shadow-2" style="border: 1px solid #a855f7;">
+								            <div class="text-white font-bold text-sm mb-2">
+								                <i class="fas fa-paper-plane mr-2 text-purple-300"></i>Enviar para #{timeBuscado.nome}
+								            </div>
+								            
+								            <p:inputTextarea value="#{gerenciarLigaBean.mensagemConvite}" rows="2" 
+								                             styleClass="w-full custom-input text-sm mb-2" autoResize="false"/>
+								
+								            <div class="flex gap-2">
+								                <p:commandButton value="Cancelar" action="#{gerenciarLigaBean.cancelarConvite}" 
+								                                 update="formGerenciarLiga:painelResultados" 
+								                                 styleClass="ui-button-secondary flex-1 p-1 text-xs font-bold"/>
+								                                 
+								                <p:commandButton value="Enviar" action="#{gerenciarLigaBean.enviarConvite}" 
+								                                 update="formGerenciarLiga:msgs formGerenciarLiga:painelResultados" 
+								                                 styleClass="ui-button-success flex-1 p-1 text-xs font-bold" icon="fas fa-check"/>
+								            </div>
+								        </div>
+								    </h:panelGroup>
+								
+								</ui:repeat>
+                            <h:panelGroup rendered="#{empty gerenciarLigaBean.resultadosBusca and not empty gerenciarLigaBean.termoBusca}">
+                                <div class="text-gray-500 text-sm text-center italic mt-3">Nenhum time encontrado.</div>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </div>
+                </div>
+
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

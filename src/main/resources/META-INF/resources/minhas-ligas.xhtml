@@ -1,0 +1,121 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/layout.xhtml">
+
+    <ui:define name="conteudo">
+        <h:form id="formLigas">
+            <p:growl id="msgs" showDetail="true" life="4000"/>
+            
+            <div class="flex justify-content-between align-items-center mb-4">
+                <h1 class="text-white text-2xl font-bold m-0"><i class="fas fa-trophy text-neon mr-2"></i> Minhas Ligas</h1>
+                
+                <h:panelGroup rendered="#{not ligaBean.exibindoFormulario}">
+                    <p:commandButton value="Criar Nova Liga" icon="fas fa-plus" 
+                                     action="#{ligaBean.prepararNovaLiga}" 
+                                     update="formLigas"
+                                     styleClass="ui-button-success rounded-btn font-bold text-sm shadow-3"/>
+                </h:panelGroup>
+            </div>
+
+            <h:panelGroup rendered="#{ligaBean.exibindoFormulario}" layout="block" 
+                          styleClass="bg-bluegray-900 p-4 border-round-xl shadow-4 mb-4" 
+                          style="border: 1px solid rgba(37, 211, 102, 0.3); border-left: 4px solid #25d366;">
+                
+                <div class="text-green-400 font-bold text-lg mb-3"><i class="fas fa-users-cog mr-2"></i> Fundar Nova Liga</div>
+                <div class="text-gray-400 text-sm mb-4">Crie um grupo fechado e convide times de confiança.</div>
+
+                <div class="formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <p:outputLabel value="Nome da Liga *" styleClass="text-white font-bold block mb-2 text-sm"/>
+                        <p:inputText value="#{ligaBean.nomeNovaLiga}" styleClass="w-full custom-input" placeholder="Ex: Panelinha Zona Sul"/>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <p:outputLabel value="Descrição (Opcional)" styleClass="text-white font-bold block mb-2 text-sm"/>
+                        <p:inputText value="#{ligaBean.descricaoNovaLiga}" styleClass="w-full custom-input" placeholder="Apenas times parceiros..."/>
+                    </div>
+                </div>
+
+                <div class="flex justify-content-end gap-2 mt-3">
+                    <p:commandButton value="Cancelar" action="#{ligaBean.cancelarNovaLiga}" update="formLigas" 
+                                     styleClass="ui-button-secondary rounded-btn text-sm font-bold"/>
+                    <p:commandButton value="Salvar Liga" action="#{ligaBean.salvarNovaLiga}" update="formLigas" 
+                                     icon="fas fa-check" styleClass="ui-button-success rounded-btn text-sm font-bold shadow-3"/>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{not empty ligaBean.convitesPendentes}">
+                <h2 class="text-yellow-400 text-lg mb-3 mt-4"><i class="fas fa-envelope-open-text mr-2"></i> Convites Recebidos</h2>
+                
+                <div class="grid grid-nogutter gap-3 mb-4">
+                    <ui:repeat value="#{ligaBean.convitesPendentes}" var="convite">
+                        <div class="col-12 md:col-6 lg:col-4">
+                            <div class="bg-black-alpha-20 p-3 border-round-xl shadow-2" style="border: 1px solid rgba(255, 204, 0, 0.3); border-left: 3px solid #ffcc00;">
+                                <div class="text-white font-bold text-lg mb-1">#{convite.liga.nome}</div>
+                                <div class="text-gray-400 text-xs mb-2">Fundada por: #{convite.liga.admin.nome}</div>
+                                
+                                <h:panelGroup rendered="#{not empty convite.mensagem}">
+                                    <div class="bg-white-alpha-10 p-2 border-round text-sm italic text-gray-300 mb-3">
+                                        <i class="fas fa-quote-left mr-2 text-yellow-500 opacity-50"></i>#{convite.mensagem}
+                                    </div>
+                                </h:panelGroup>
+
+                                <div class="flex gap-2 mt-2">
+                                    <p:commandButton value="Entrar" action="#{ligaBean.aceitarConvite(convite)}" update="formLigas" icon="fas fa-check" styleClass="ui-button-success flex-1 p-1 text-sm font-bold"/>
+                                    <p:commandButton value="Recusar" action="#{ligaBean.recusarConvite(convite)}" update="formLigas" icon="fas fa-times" styleClass="ui-button-danger flex-1 p-1 text-sm font-bold"/>
+                                </div>
+                            </div>
+                        </div>
+                    </ui:repeat>
+                </div>
+            </h:panelGroup>
+
+            <h2 class="text-white text-lg mb-3 mt-4"><i class="fas fa-shield-alt mr-2 text-gray-400"></i> Ligas que Participo</h2>
+            
+            <h:panelGroup rendered="#{empty ligaBean.minhasLigas}">
+                <div class="text-gray-500 text-center p-5 bg-black-alpha-10 border-round-xl" style="border: 1px dashed rgba(255,255,255,0.1);">
+                    <i class="fas fa-trophy text-4xl mb-3 opacity-50"></i><br/>
+                    Você ainda não participa de nenhuma liga.<br/>Crie uma nova ou aguarde um convite!
+                </div>
+            </h:panelGroup>
+
+            <div class="grid grid-nogutter gap-3">
+                <ui:repeat value="#{ligaBean.minhasLigas}" var="liga">
+                    <div class="col-12 md:col-6 lg:col-4">
+                        <div class="bg-bluegray-900 p-3 border-round-xl shadow-4 hover:shadow-6 transition-all transition-duration-300" style="border: 1px solid rgba(255,255,255,0.1);">
+                            
+                            <div class="flex align-items-center mb-3 border-bottom-1 border-white-alpha-10 pb-2">
+                                <div class="border-circle bg-bluegray-800 flex align-items-center justify-content-center border-1 border-bluegray-600 mr-3 shadow-1" style="width: 45px; height: 45px;">
+                                    <i class="fas fa-trophy text-neon text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="text-white font-bold text-lg">#{liga.nome}</div>
+                                    <div class="text-gray-400 text-xs">#{liga.times.size()} times parceiros</div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-gray-300 text-sm mb-3 min-h-full" style="min-height: 40px;">
+                                #{empty liga.descricao ? 'Sem descrição' : liga.descricao}
+                            </div>
+                            
+                            <div class="flex justify-content-between align-items-center pt-2 border-top-1 border-white-alpha-10">
+                                <h:panelGroup rendered="#{liga.admin.id == 1}"> <span class="text-green-400 text-xs font-bold bg-green-900 px-2 py-1 border-round"><i class="fas fa-crown mr-1"></i> Admin</span>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{liga.admin.id != 1}">
+                                    <span class="text-blue-300 text-xs font-bold"><i class="fas fa-user-shield mr-1"></i> Membro</span>
+                                </h:panelGroup>
+
+                                <p:button outcome="/gerenciar-liga.xhtml" value="Acessar" icon="fas fa-sign-in-alt" styleClass="ui-button-outlined rounded-btn text-sm p-1 font-bold">
+    								<f:param name="id" value="#{liga.id}" />
+								</p:button>
+                            </div>
+                        </div>
+                    </div>
+                </ui:repeat>
+            </div>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

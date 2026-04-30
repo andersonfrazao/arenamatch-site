@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <title>Arena Match</title>
+
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
+    
+    <h:outputStylesheet library="css" name="styles.css" />
+    <link href="https://unpkg.com/primeflex@3.3.1/primeflex.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <style>
+        /* Estrutura Principal */
+        .am-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+        .am-layout-login { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
+
+        .am-sidebar {
+            background: rgba(15, 23, 42, 0.95); border-right: 1px solid rgba(255,255,255,0.08);
+            position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 1.5rem 1rem; z-index: 100;
+        }
+
+        .am-brand {
+            display: flex; align-items: center; gap: 1rem; padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .am-logo-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.4);
+            display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.2rem;
+        }
+
+        .am-nav a {
+            display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 12px;
+            color: #94a3b8; text-decoration: none; font-weight: 600; margin-bottom: 0.5rem; transition: all 0.2s;
+        }
+        .am-nav a:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .am-nav a.active {
+            background: rgba(14, 165, 233, 0.15); color: #38bdf8;
+            border-left: 4px solid #38bdf8; border-radius: 0 12px 12px 0;
+        }
+
+        .am-team-box {
+            margin-top: auto; padding: 1rem; background: rgba(0,0,0,0.2);
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .am-main { display: flex; flex-direction: column; width: 100%; max-width: 100vw; overflow-x: hidden; }
+
+        .am-topbar {
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1.2rem 2rem;
+            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 90; flex-wrap: wrap; gap: 1rem;
+        }
+
+        .am-content-area { padding: 2rem; flex-grow: 1; }
+
+        /* NOVAS CLASSES DO PROTÓTIPO (NOTIFICAÇÕES) */
+        .am-pill {
+            padding: .35rem .6rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.82); font-size: .85rem;
+            display: inline-flex; align-items: center; gap: .45rem; white-space: nowrap;
+        }
+
+        .am-badge-total {
+            position: absolute; top: -8px; right: -8px; padding: .18rem .45rem; border-radius: 999px;
+            font-size: .75rem; font-weight: 900; border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); color: white;
+        }
+
+        .am-notif-panel {
+            display: none; padding: 1rem; border-radius: 18px; border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(15, 23, 42, 0.95); margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .am-notif-panel.open { display: block; animation: amFadeIn 0.3s ease; }
+        
+        .am-notif-row {
+            display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem;
+            padding: .85rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.04); flex-wrap: wrap; margin-top: 0.5rem;
+        }
+
+        @keyframes amFadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MENU MOBILE */
+        .am-bottom-nav { display: none; }
+
+        @media (max-width: 980px){
+            .am-layout { grid-template-columns: 1fr; }
+            .am-sidebar { display: none; }
+            .am-content-area { padding: 1rem; padding-bottom: 6rem; }
+            .am-topbar { flex-direction: column; align-items: flex-start; }
+            .am-bottom-nav {
+                display: flex; position: fixed; left: 0; right: 0; bottom: 0;
+                background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);
+                border-top: 1px solid rgba(255,255,255,0.1); z-index: 999; padding: 0.5rem 0;
+            }
+            .am-b-item {
+                flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+                color: #94a3b8; text-decoration: none; font-size: 0.75rem; padding: 0.5rem;
+            }
+            .am-b-item.active { color: #38bdf8; font-weight: bold; }
+        }
+    </style>
+</h:head>
+
+<h:body>
+<h:form id="globalForm">
+        <p:growl id="msgs" showDetail="true" life="4000" />
+        
+        <p:idleMonitor timeout="1800000">
+            <p:ajax event="idle" listener="#{sessaoBean.logout}" oncomplete="window.location.href='login.xhtml';" />
+        </p:idleMonitor>
+    </h:form>
+
+    <h:panelGroup layout="block" styleClass="#{sessaoBean.logado ? 'am-layout' : 'am-layout-login'}">
+
+        <h:panelGroup rendered="#{sessaoBean.logado}">
+            <aside class="am-sidebar">
+                
+                <div class="am-brand">
+                    <div class="am-logo-icon"><i class="fas fa-trophy"></i></div>
+                    <div>
+                        <div class="text-white font-bold text-xl tracking-tight">Arena <span style="color: #38bdf8;">Match</span></div>
+                        <div style="color: #94a3b8; font-size: 0.8rem;">Agende • Match • Ligas</div>
+                    </div>
+                </div>
+
+                <nav class="am-nav flex-grow-1">
+                    <h:link outcome="/minha-agenda" styleClass="#{view.viewId eq '/minha-agenda.xhtml' ? 'active' : ''}">
+                        <i class="far fa-calendar-alt w-2rem text-center text-lg"></i> Agenda
+                    </h:link>
+                    <h:link outcome="/busca-time" styleClass="#{view.viewId eq '/busca-time.xhtml' ? 'active' : ''}">
+                        <i class="fas fa-search w-2rem text-center text-lg"></i> Buscar jogo
+                    </h:link>
+<h:link outcome="/ranking" styleClass="#{view.viewId eq '/ranking.xhtml' ? 'active' : ''}">
+                        <i class="fas fa-list-ol w-2rem text-center text-lg"></i> Ranking
+                    </h:link>                    
+					<h:link outcome="/chat" styleClass="#{view.viewId eq '/chat.xhtml' ? 'active' : ''}">
+				        <i class="fas fa-comments w-2rem text-center text-lg"></i> 
+				        Chat 
+				        <p:badge value="#{sessaoBean.qtdMensagensNaoLidas}" rendered="#{sessaoBean.qtdMensagensNaoLidas > 0}" severity="danger" styleClass="ml-2"/>
+				    </h:link>				    
+                    <h:link outcome="/cadastro" styleClass="#{view.viewId eq '/cadastro.xhtml' ? 'active' : ''}">
+                        <i class="fas fa-id-card w-2rem text-center text-lg"></i> Meus Dados
+                    </h:link>
+
+                    <div class="mt-4 pt-3 border-top-1 border-white-alpha-10 w-full">
+                        <div class="text-gray-500 text-xs font-bold uppercase px-3 mb-2 tracking-wider">Suporte</div>
+                        <h:link outcome="/fale-conosco" styleClass="#{view.viewId eq '/fale-conosco.xhtml' ? 'active' : ''}">
+                            <i class="fas fa-headset w-2rem text-center text-lg text-blue-400"></i> Fale Conosco
+                        </h:link>
+                    </div>
+                </nav>
+
+                <div class="am-team-box">
+                    <div class="flex align-items-center gap-3 mb-3">
+                        <div class="flex align-items-center justify-content-center bg-blue-900 border-circle border-1 border-blue-400" style="width: 42px; height: 42px;">
+                            <i class="fas fa-shield-alt text-xl" style="color: #38bdf8;"></i>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="font-bold text-white text-sm">#{sessaoBean.usuarioLogado.nome}</div>
+                            <div style="color: #38bdf8; font-size: 0.75rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                #{dashboardBean.time.nome}
+                            </div>
+                        </div>
+                    </div>
+                    <h:form>
+                        <p:commandLink action="#{sessaoBean.logout}" ajax="false" 
+                                       styleClass="flex align-items-center justify-content-center gap-2 px-3 py-2 border-round-lg text-white no-underline font-bold transition-colors hover:bg-red-900"
+                                       style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); width: 100%;">
+                            <i class="fas fa-sign-out-alt"></i> Sair do App
+                        </p:commandLink>
+                    </h:form>
+                </div>
+            </aside>
+        </h:panelGroup>
+
+        <main class="am-main">
+            
+            <h:panelGroup rendered="#{sessaoBean.logado}">
+            <h:form>
+                <p:remoteCommand name="atualizarSininhoAjax" 
+                         action="#{notificacaoBean.carregarNotificacoes}" 
+                         update="painelNotificacoesGlobais" />
+                </h:form>
+            </h:panelGroup>
+
+            <h:panelGroup id="painelNotificacoesGlobais" layout="block">
+                
+                <h:panelGroup rendered="#{sessaoBean.logado}" layout="block" styleClass="am-topbar">
+                    <div class="flex-grow-1">
+                        <div class="text-white font-bold text-2xl"><ui:insert name="tituloPagina">Arena Match</ui:insert></div>
+                        <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 4px;">
+                            <ui:insert name="subtituloPagina">Seu painel de controle esportivo</ui:insert>
+                        </div>
+                    </div>
+
+                    <div class="flex align-items-center gap-2 flex-wrap">
+                    
+                        <div class="flex align-items-center justify-content-center cursor-pointer relative transition-colors hover:bg-white-alpha-10 ml-2" 
+                             id="amBellBtn" style="width: 44px; height: 44px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.18);">
+                            <i class="far fa-bell text-white text-xl"></i>
+                            <h:panelGroup rendered="#{notificacaoBean.totalNotificacoes > 0}">
+                                <span class="am-badge-total">#{notificacaoBean.totalNotificacoes}</span>
+                            </h:panelGroup>
+                        </div>                    
+                        
+                        <span class="am-pill">
+                            <i class="fas fa-futbol" style="color: #ffcc00;"></i> Jogos: <b class="text-white">#{notificacaoBean.totalConvitesJogo}</b>
+                        </span>
+               <!--          <span class="am-pill">
+                            <i class="fas fa-trophy" style="color: #3aa0ff;"></i> Ligas: <b class="text-white">#{notificacaoBean.totalConvitesLiga}</b>
+                        </span>
+                         -->
+                        
+                        <h:form styleClass="md:hidden ml-2"> 
+                            <p:commandLink action="#{sessaoBean.logout}" ajax="false" 
+                                           styleClass="flex align-items-center justify-content-center transition-colors hover:bg-red-900 text-white"
+                                           style="width: 44px; height: 44px; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.2);"
+                                           title="Sair do App">
+                                <i class="fas fa-sign-out-alt text-xl"></i>
+                            </p:commandLink>
+                        </h:form>
+
+                    </div>
+                </h:panelGroup>
+
+                <div class="#{sessaoBean.logado ? 'am-content-area' : ''}">
+                    
+                    <h:panelGroup rendered="#{sessaoBean.logado}">
+                        <section class="am-notif-panel" id="amNotifPanel">
+                            <div style="font-weight:900; margin-bottom:.7rem; color: white; font-size: 1.1rem;">
+                                Notificações <span style="color: rgba(255,255,255,0.65); font-weight:600; font-size: 0.9rem;">(convites pendentes)</span>
+                            </div>
+
+                            <h:panelGroup rendered="#{empty notificacaoBean.listaNotificacoes}">
+                                <div class="text-gray-400 text-sm mt-3"><i class="fas fa-check-double mr-2"></i>Tudo limpo por aqui! Você não tem novos convites.</div>
+                            </h:panelGroup>
+
+                            <ui:repeat value="#{notificacaoBean.listaNotificacoes}" var="notif">
+                                <div class="am-notif-row flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        
+                                        <h:panelGroup rendered="#{notif.tipo eq 'LIGA'}">
+                                            <div class="text-white" style="font-weight:900;">
+                                                <i class="fas fa-trophy" style="color:#3aa0ff; margin-right:.4rem;"></i> #{notif.titulo}
+                                            </div>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'JOGO'}">
+                                            <div class="text-white" style="font-weight:900;">
+                                                <i class="fas fa-futbol" style="color:#ffcc00; margin-right:.4rem;"></i> #{notif.titulo}
+                                            </div>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'PLACAR'}">
+                                            <div class="text-white" style="font-weight:900;">
+                                                <i class="fas fa-stopwatch text-green-400" style="margin-right:.4rem;"></i> #{notif.titulo}
+                                            </div>
+                                        </h:panelGroup>
+
+                                        <div style="color: rgba(255,255,255,0.65); font-size: 0.9rem;">#{notif.subtitulo}</div>
+                                        
+                                        <div class="text-xs text-gray-400 mt-1 font-italic">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <h:outputText value="#{notif.dataCriacao}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" type="localDateTime" />
+                                            </h:outputText>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex gap-2 flex-wrap mt-2 sm:mt-0 align-items-center">
+                                        
+                                        <h:panelGroup rendered="#{notif.tipo eq 'LIGA'}">
+                                            <p:commandButton action="#{notificacaoBean.aceitarConvite(notif)}" update="painelNotificacoesGlobais globalForm:msgs" 
+                                                             icon="fas fa-check" styleClass="ui-button-success rounded-btn ui-button-sm shadow-2" title="Aceitar" />
+                                                             
+                                            <p:commandButton action="#{notificacaoBean.recusarConvite(notif)}" update="painelNotificacoesGlobais globalForm:msgs" 
+                                                             icon="fas fa-times" styleClass="ui-button-danger rounded-btn ui-button-sm shadow-2" title="Recusar" />
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'JOGO' and not notif.enviadoPorMim}">
+                                            <p:commandButton action="#{notificacaoBean.aceitarConvite(notif)}" update="painelNotificacoesGlobais globalForm:msgs" 
+                                                             icon="fas fa-check" styleClass="ui-button-success rounded-btn ui-button-sm shadow-2" title="Aceitar" />
+                                                             
+                                            <p:commandButton action="#{notificacaoBean.recusarConvite(notif)}" update="painelNotificacoesGlobais globalForm:msgs" 
+                                                             icon="fas fa-times" styleClass="ui-button-danger rounded-btn ui-button-sm shadow-2" title="Recusar" />
+                                            
+                                            <p:button value="Negociar" outcome="/chat.xhtml" icon="far fa-comments" styleClass="ui-button-secondary rounded-btn ui-button-sm shadow-2">
+    													<f:param name="p" value="#{notif.idReferencia}" />
+											</p:button>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'JOGO' and notif.enviadoPorMim}">
+                                            <span class="text-yellow-500 text-sm font-bold mr-3 flex align-items-center"><i class="fas fa-clock mr-1"></i> Aguardando adversário...</span>
+                                            
+                                            <p:commandButton value="Cancelar" action="#{notificacaoBean.cancelarConvite(notif)}" update="painelNotificacoesGlobais globalForm:msgs" 
+                                                             icon="fas fa-trash" styleClass="ui-button-danger ui-button-flat rounded-btn ui-button-sm" />
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'PLACAR'}">
+                                            <p:commandButton value="Confirmar" action="#{notificacaoBean.confirmarResultadoPlacar(notif)}" 
+                                                             update="painelNotificacoesGlobais globalForm:msgs" 
+                                                             icon="fas fa-check" styleClass="ui-button-success rounded-btn ui-button-sm shadow-2" title="Aceitar" />
+                                                             
+                                            <p:commandButton value="Contestar" action="#{notificacaoBean.contestarResultadoPlacar(notif)}" 
+                                                             update="painelNotificacoesGlobais globalForm:msgs" 
+                                                             icon="fas fa-times" styleClass="ui-button-danger rounded-btn ui-button-sm shadow-2" title="Rejeitar" />
+                                        </h:panelGroup>
+
+                                    </div>
+                                </div>
+                            </ui:repeat>
+                        </section>
+                    </h:panelGroup>
+
+                    <ui:insert name="conteudo" />
+
+                </div>
+            </h:panelGroup>
+        </main>
+    </h:panelGroup>
+
+    <h:panelGroup rendered="#{sessaoBean.logado}">
+		<div class="am-bottom-nav">
+		    <h:link outcome="/minha-agenda" styleClass="am-b-item #{view.viewId eq '/minha-agenda.xhtml' ? 'active' : ''}">
+		        <i class="far fa-calendar-alt text-xl"></i><span>Agenda</span>
+		    </h:link>
+		    <h:link outcome="/busca-time" styleClass="am-b-item #{view.viewId eq '/busca-time.xhtml' ? 'active' : ''}">
+		        <i class="fas fa-search text-xl"></i><span>Buscar</span>
+		    </h:link>
+<h:link outcome="/ranking" styleClass="am-b-item #{view.viewId eq '/ranking.xhtml' ? 'active' : ''}">
+		        <i class="fas fa-list-ol text-xl"></i><span>Ranking</span>
+		    </h:link>
+		    <h:link outcome="/chat" styleClass="am-b-item #{view.viewId eq '/chat.xhtml' ? 'active' : ''}">
+		        <i class="fas fa-comments text-xl relative">
+		            <h:panelGroup rendered="#{sessaoBean.qtdMensagensNaoLidas > 0}">
+		                <span class="absolute" style="top:-5px; right:-8px; background:red; border-radius:50%; width:10px; height:10px;"></span>
+		            </h:panelGroup>
+		        </i>
+		        <span>Chat</span>
+		    </h:link>		    
+		    <h:link outcome="/cadastro" styleClass="am-b-item #{view.viewId eq '/cadastro.xhtml' ? 'active' : ''}">
+		        <i class="fas fa-id-card text-xl"></i><span>Dados</span>
+		    </h:link>
+            
+            <h:link outcome="/fale-conosco" styleClass="am-b-item #{view.viewId eq '/fale-conosco.xhtml' ? 'active' : ''}">
+                <i class="fas fa-headset text-xl"></i><span>Suporte</span>
+            </h:link>
+		</div>
+        
+        <script>
+            // Lógica para abrir/fechar o painel de notificações
+            const bellBtn = document.getElementById("amBellBtn");
+            const notifPanel = document.getElementById("amNotifPanel");
+            if(bellBtn){
+                bellBtn.addEventListener("click", () => {
+                    notifPanel.classList.toggle("open");
+                    if(notifPanel.classList.contains("open")){
+                        notifPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                });
+            }
+        </script>
+    </h:panelGroup>
+
+    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false" styleClass="bg-transparent shadow-none">
+        <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #38bdf8;"></i>
+    </p:dialog>
+    
+    <h:panelGroup rendered="#{sessaoBean.logado}">
+        <script>
+            var stompClient = null;
+
+            function conectarWebSocket() {
+                // CORREÇÃO AQUI: Pegando o ID do time (e não do usuário)
+                var meuTimeId = '#{sessaoBean.usuarioLogado.idTime}';
+                
+                if (!meuTimeId) return; // Se não tiver logado ou sem time, nem tenta conectar
+
+                // Aponta para o endereço que você configurou no Spring Boot
+                var socket = new SockJS('/ws-arenamatch'); 
+                stompClient = Stomp.over(socket);
+                
+                // Desliga os logs irritantes no console do navegador (opcional)
+                stompClient.debug = null; 
+
+                // Conecta o túnel!
+                stompClient.connect({}, function (frame) {
+                    console.log('Conectado no Arena Match WebSocket com o Time ID: ' + meuTimeId);
+                    
+                    // Se inscreve apenas na sala do SEU time
+                    stompClient.subscribe('/topic/notificacoes/' + meuTimeId, function (mensagem) {
+                        
+                        // Quando o Java gritar "CHEGOU_CONVITE", a gente age!
+                        if(mensagem.body === "CHEGOU_CONVITE") {
+                            console.log("Uma notificação em tempo real chegou!");
+                            
+                            // CHAMA O PRIMEFACES PARA ATUALIZAR A TELA (RemoteCommand)
+                            atualizarSininhoAjax(); 
+                        }
+                    });
+                }, function(error) {
+                    console.log('Erro no WebSocket. Tentando reconectar em 5 segundos...', error);
+                    setTimeout(conectarWebSocket, 5000);
+                });
+            }
+
+            // Inicia a conexão assim que a página terminar de carregar
+            window.onload = function() {
+                conectarWebSocket();
+            };
+        </script>
+    </h:panelGroup>
+</h:body>
+</html>

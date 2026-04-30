@@ -1,0 +1,100 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template/layout.xhtml">
+
+    <ui:define name="conteudo">
+        
+        <h:form id="formBusca">
+            
+            <div class="card bg-glass p-4 mb-4" style="border-radius: 12px;">
+                <h2 class="text-neon mt-0 mb-3"><i class="fas fa-search"></i> Encontrar Adversários</h2>
+                
+                <div class="formgrid grid">
+                    <div class="field col-12 md:col-3">
+                        <p:outputLabel value="Cidade" styleClass="text-white font-bold"/>
+                        <p:inputText value="#{buscaBean.filtro.cidade}" placeholder="Ex: São Paulo" styleClass="w-full custom-input"/>
+                    </div>
+                    
+                    <div class="field col-12 md:col-2">
+                        <p:outputLabel value="Dia" styleClass="text-white font-bold"/>
+                        <p:selectOneMenu value="#{buscaBean.filtro.diaSemana}" styleClass="w-full custom-input">
+                            <f:selectItem itemLabel="Todos" itemValue="#{null}"/>
+                            <f:selectItem itemLabel="Segunda" itemValue="Segunda"/>
+                            <f:selectItem itemLabel="Terça" itemValue="Terça"/>
+                            <f:selectItem itemLabel="Quarta" itemValue="Quarta"/>
+                            <f:selectItem itemLabel="Quinta" itemValue="Quinta"/>
+                            <f:selectItem itemLabel="Sexta" itemValue="Sexta"/>
+                            <f:selectItem itemLabel="Sábado" itemValue="Sábado"/>
+                            <f:selectItem itemLabel="Domingo" itemValue="Domingo"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="field col-12 md:col-2">
+                        <p:outputLabel value="Categoria" styleClass="text-white font-bold"/>
+                        <p:selectOneMenu value="#{buscaBean.filtro.categoria}" styleClass="w-full custom-input">
+                            <f:selectItem itemLabel="Todas" itemValue="#{null}"/>
+                            <f:selectItems value="#{buscaBean.categorias}" var="c" itemLabel="#{c.descricao}" itemValue="#{c}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <div class="field col-12 md:col-3">
+                        <p:outputLabel value="Meu CEP (Para Distância)" styleClass="text-white font-bold"/>
+                        <p:inputMask value="#{buscaBean.filtro.cepReferencia}" mask="99999-999" styleClass="w-full custom-input" placeholder="00000-000"/>
+                    </div>
+
+                    <div class="field col-12 md:col-2 flex align-items-end">
+                        <p:commandButton value="Buscar" action="#{buscaBean.pesquisar}" update="dataView" 
+                                         icon="fas fa-search" styleClass="w-full font-bold ui-button-warning"
+                                         style="height: 46px;"/>
+                    </div>
+                </div>
+            </div>
+
+            <p:dataView id="dataView" var="time" value="#{buscaBean.resultados}" layout="grid" 
+                        gridIcon="pi pi-th-large" listIcon="pi pi-bars"
+                        emptyMessage="Nenhum time encontrado com esses filtros.">
+
+                <p:dataViewGridItem>
+                    <div class="p-3">
+                        <div class="bg-glass border-round-xl p-3 shadow-4 text-center relative h-full flex flex-column align-items-center" 
+                             style="border: 1px solid rgba(255,255,255,0.1); min-height: 280px;">
+                            
+                            <h:panelGroup rendered="#{time.distanciaKm != null}" 
+                                          styleClass="absolute top-0 right-0 m-2 px-2 py-1 bg-green-500 text-white border-round text-sm font-bold shadow-2">
+                                <i class="fas fa-map-marker-alt mr-1"></i> #{time.distanciaKm} km
+                            </h:panelGroup>
+
+                            <div class="border-circle bg-bluegray-800 flex align-items-center justify-content-center mb-3 shadow-3" 
+                                 style="width: 80px; height: 80px; margin: 0 auto;">
+                                <i class="fas fa-shield-alt text-4xl text-bluegray-400"></i>
+                            </div>
+
+                            <div class="text-xl font-bold text-white mb-1">#{time.nome}</div>
+                            <div class="text-sm text-gray-400 mb-3"><i class="fas fa-map-pin mr-1"></i> #{time.regiao} - #{time.uf}</div>
+
+                            <div class="mb-3">
+                                <span class="px-2 py-1 text-xs border-round #{time.mandoCampo ? 'bg-blue-500' : 'bg-gray-600'} text-white">
+                                    #{time.mandoCampo ? 'MANDANTE' : 'VISITANTE'}
+                                </span>
+                            </div>
+                            
+                            <div class="text-left w-full mt-auto bg-black-alpha-20 p-2 border-round text-sm text-gray-300">
+                                <i class="far fa-calendar-alt text-neon mr-1"></i> <strong>Joga:</strong> #{time.diasDaSemanaTexto}
+                            </div>
+
+                            <p:commandButton value="Desafiar" icon="fas fa-comments" 
+                                             styleClass="mt-3 w-full ui-button-outlined rounded-btn" 
+                                             style="color: #0ea5e9; border-color: #0ea5e9;"/>
+                        </div>
+                    </div>
+                </p:dataViewGridItem>
+
+            </p:dataView>
+            
+        </h:form>
+
+    </ui:define>
+</ui:composition>

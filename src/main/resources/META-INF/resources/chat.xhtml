@@ -1,0 +1,258 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/layout.xhtml">
+
+    <ui:define name="conteudo">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+        <style>
+            .chat-container { height: calc(100vh - 150px); min-height: 500px; display: flex; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+            .inbox-panel { background: rgba(15, 23, 42, 0.9); width: 350px; border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; }
+            .conversa-item { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s; }
+            .conversa-item:hover { background: rgba(255,255,255,0.05); }
+            .conversa-item.active { background: rgba(59, 130, 246, 0.2); border-left: 4px solid #3b82f6; }
+            
+            .chat-panel { background: rgba(15, 23, 42, 0.6); flex-grow: 1; display: flex; flex-direction: column; }
+            .chat-header { background: rgba(15, 23, 42, 0.9); padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+            .chat-messages { flex-grow: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+            .chat-input-area { background: rgba(15, 23, 42, 0.9); padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
+            
+            .balao { max-width: 70%; padding: 0.75rem 1rem; border-radius: 16px; font-size: 0.95rem; line-height: 1.4; position: relative; }
+            .balao-meu { background: #065f46; color: white; border-bottom-right-radius: 4px; }
+            .balao-outro { background: #334155; color: white; border-bottom-left-radius: 4px; }
+            .hora-msg { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; text-align: right; display: block; }
+        </style>
+
+        <h:form id="formChat">
+            <p:remoteCommand name="rcAtualizarChat" action="#{chatBean.chegouMensagemPeloWebSocket}" update=":formChat:painelChat :formChat:painelInbox" oncomplete="rolarParaFim();" />
+
+            <div class="chat-container shadow-6">
+                
+                <h:panelGroup id="painelInbox" layout="block" styleClass="inbox-panel #{not empty chatBean.conversaSelecionada ? 'hidden md:flex' : 'flex'}">
+                    <div class="p-3 border-bottom-1 border-white-alpha-10 text-white font-bold text-xl">
+                        <i class="fas fa-comments text-blue-400 mr-2"></i> Mensagens
+                    </div>
+                    
+                    <div style="overflow-y: auto; flex-grow: 1;">
+                        <ui:repeat value="#{chatBean.inbox}" var="conv">
+                            
+                            <!-- O oncomplete foi ajustado para evitar erros se o ID for nulo -->
+                            <p:commandLink action="#{chatBean.selecionarConversa(conv)}" 
+                                           process="@this"
+                                           update=":formChat:painelChat :formChat:painelInbox"
+                                           oncomplete="conectarWebSocketChat('#{conv.tipo}', '#{conv.tipo eq 'JOGO' ? conv.idPartida : conv.idLiga}'); rolarParaFim();"
+                                           styleClass="flex align-items-center p-3 border-bottom-1 border-white-alpha-10 transition-colors hover:bg-white-alpha-5 text-decoration-none 
+                                                       #{ (chatBean.conversaSelecionada ne null and 
+                                                          ((conv.tipo eq 'JOGO' and chatBean.conversaSelecionada.idPartida eq conv.idPartida) or 
+                                                           (conv.tipo eq 'LIGA' and chatBean.conversaSelecionada.idLiga eq conv.idLiga))) 
+                                                          ? 'bg-white-alpha-10 border-left-3 border-blue-500' : ''}">
+                                
+                                <div class="border-circle flex align-items-center justify-content-center border-1 mr-3 shadow-2
+                                            #{ (chatBean.conversaSelecionada ne null and 
+                                               ((conv.tipo eq 'JOGO' and chatBean.conversaSelecionada.idPartida eq conv.idPartida) or 
+                                                (conv.tipo eq 'LIGA' and chatBean.conversaSelecionada.idLiga eq conv.idLiga))) 
+                                               ? 'bg-blue-600 border-blue-400' : 'bg-bluegray-800 border-bluegray-600'}" 
+                                     style="width: 50px; height: 50px; min-width: 50px;">
+                                    <h:panelGroup rendered="#{conv.tipo eq 'JOGO'}"><i class="fas fa-shield-alt text-2xl text-gray-300"></i></h:panelGroup>
+                                    <h:panelGroup rendered="#{conv.tipo eq 'LIGA'}"><i class="fas fa-trophy text-2xl text-purple-400"></i></h:panelGroup>
+                                </div>
+
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="flex justify-content-between align-items-center mb-1">
+                                        <span class="text-white font-bold text-lg text-overflow-ellipsis overflow-hidden white-space-nowrap"> 
+                                            #{conv.nomeAdversario}
+                                        </span>
+                                        <h:outputText value="#{conv.horaUltimaMensagem}" styleClass="text-xs text-gray-400" rendered="#{not empty conv.horaUltimaMensagem}">
+                                            <f:convertDateTime pattern="dd/MM HH:mm" type="localDateTime" />
+                                        </h:outputText>
+                                    </div>
+                                    
+                                    <!-- NOVO BLOCO: DATA DA PARTIDA NA INBOX -->
+                                    <h:panelGroup rendered="#{conv.tipo eq 'JOGO' and not empty conv.dataJogo}">
+                                        <div class="text-blue-300 text-xs mb-1 flex align-items-center text-overflow-ellipsis overflow-hidden white-space-nowrap font-italic">
+                                            <i class="far fa-calendar-alt mr-1"></i> Marcada p/ 
+                                            <h:outputText value="#{conv.dataJogo}" styleClass="ml-1 font-bold">
+                                                <f:convertDateTime pattern="dd/MM 'às' HH:mm" type="localDateTime"/>
+                                            </h:outputText>
+                                        </div>
+                                    </h:panelGroup>
+                                    
+                                    <h:panelGroup rendered="#{conv.tipo eq 'LIGA'}">
+                                        <div class="text-purple-400 text-xs mb-1 flex align-items-center text-overflow-ellipsis overflow-hidden white-space-nowrap font-italic">
+                                            <i class="fas fa-users mr-1"></i> Grupo da Liga
+                                        </div>
+                                    </h:panelGroup>
+                                    <!-- FIM DO NOVO BLOCO -->
+
+                                    <div class="flex justify-content-between align-items-center">
+                                        <div class="text-gray-400 text-sm text-overflow-ellipsis overflow-hidden white-space-nowrap">
+                                            <h:panelGroup rendered="#{conv.enviadaPorMim}"><span class="text-blue-400 font-bold mr-1">Você:</span></h:panelGroup>
+                                            <h:panelGroup rendered="#{conv.tipo eq 'LIGA' and not conv.enviadaPorMim and conv.textoUltimaMensagem ne 'Bem-vindo à liga!'}">
+                                                <i class="fas fa-users text-xs text-purple-400 mr-1"></i>
+                                            </h:panelGroup>
+                                            #{conv.textoUltimaMensagem}
+                                        </div>
+                                        <p:badge value="#{conv.qtdNaoLidas}" rendered="#{conv.qtdNaoLidas > 0}" severity="danger" />
+                                    </div>
+                                </div>
+                            </p:commandLink>
+                        </ui:repeat>
+
+                        <h:panelGroup rendered="#{empty chatBean.inbox}">
+                            <div class="p-4 text-center text-gray-500 text-sm">Nenhuma conversa ativa no momento.</div>
+                        </h:panelGroup>
+                    </div>
+                </h:panelGroup>
+
+                <h:panelGroup id="painelChat" layout="block" styleClass="chat-panel #{empty chatBean.conversaSelecionada ? 'hidden md:flex' : 'flex'}">
+                    
+                    <h:panelGroup rendered="#{empty chatBean.conversaSelecionada}" styleClass="h-full flex flex-column align-items-center justify-content-center text-gray-500">
+                        <i class="fas fa-paper-plane text-6xl mb-3 opacity-30"></i>
+                        <div class="text-xl">Selecione uma conversa para começar</div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{not empty chatBean.conversaSelecionada}" styleClass="flex flex-column h-full w-full">
+                        
+                        <!-- REMOVIDO: Aquele script do $(document).ready() que estava causando o bug de travar os cliques -->
+
+                        <div class="chat-header flex justify-content-between align-items-center">
+                            <div class="flex align-items-center">
+                                
+                                <p:commandLink action="#{chatBean.setConversaSelecionada(null)}" 
+                                               process="@this" 
+                                               update=":formChat:painelChat :formChat:painelInbox"
+                                               styleClass="md:hidden text-white mr-3">
+                                    <i class="fas fa-arrow-left text-xl"></i>
+                                </p:commandLink>
+
+                                <div class="border-circle flex align-items-center justify-content-center border-1 mr-3 shadow-2
+                                            #{chatBean.conversaSelecionada.tipo eq 'LIGA' ? 'bg-purple-900 border-purple-400' : 'bg-gray-800 border-gray-600'}" 
+                                     style="width: 45px; height: 45px; min-width: 45px;">
+                                    <h:panelGroup rendered="#{chatBean.conversaSelecionada.tipo eq 'JOGO'}"><i class="fas fa-shield-alt text-xl text-white"></i></h:panelGroup>
+                                    <h:panelGroup rendered="#{chatBean.conversaSelecionada.tipo eq 'LIGA'}"><i class="fas fa-trophy text-xl text-white"></i></h:panelGroup>
+                                </div>
+                                <div>
+                                    <div class="text-white font-bold text-xl">#{chatBean.conversaSelecionada.nomeAdversario}</div>
+                                    <div class="text-sm text-gray-400 flex align-items-center gap-2">
+                                        <h:panelGroup rendered="#{chatBean.conversaSelecionada.tipo eq 'JOGO'}">
+                                            <i class="fas fa-futbol text-blue-400"></i> Partida marcada para 
+                                            <h:outputText value="#{chatBean.conversaSelecionada.dataJogo}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" type="localDateTime"/>
+                                            </h:outputText>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{chatBean.conversaSelecionada.tipo eq 'LIGA'}">
+                                            <i class="fas fa-users text-purple-400"></i> Grupo da Liga
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="painelMensagensScroll" class="chat-messages">
+                            <ui:repeat value="#{chatBean.mensagens}" var="msg">
+                                <div class="flex #{msg.enviadaPorMim ? 'justify-content-end' : 'justify-content-start'} w-full">
+                                    <div class="balao #{msg.enviadaPorMim ? 'balao-meu shadow-3' : 'balao-outro shadow-2'}">
+                                        
+                                        <h:panelGroup rendered="#{chatBean.conversaSelecionada.tipo eq 'LIGA' and not msg.enviadaPorMim}">
+                                            <div class="text-purple-300 font-bold text-xs mb-1 border-bottom-1 border-purple-800 pb-1"> 
+                                                #{msg.nomeRemetente} 
+                                            </div>
+                                        </h:panelGroup>
+
+                                        <h:outputText value="#{msg.texto}" escape="false" />
+                                        
+                                        <div class="hora-msg flex align-items-center justify-content-end gap-1">
+                                            <h:outputText value="#{msg.dataHora}">
+                                                <f:convertDateTime pattern="HH:mm" type="localDateTime"/>
+                                            </h:outputText>
+                                            <h:panelGroup rendered="#{msg.enviadaPorMim}">
+                                                <i class="fas fa-check-double text-blue-300"></i>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ui:repeat>
+                        </div>
+
+						<h:panelGroup rendered="#{not chatBean.conversaSelecionada.encerrada}">
+                            <div class="chat-input-area flex gap-2 align-items-end">
+                                <p:inputTextarea value="#{chatBean.novaMensagem}" rows="2" autoResize="false"
+                                                 placeholder="Escreva sua mensagem aqui..." 
+                                                 styleClass="w-full custom-input text-lg m-0"
+                                                 onkeypress="if (event.keyCode == 13 &amp;&amp; !event.shiftKey) { event.preventDefault(); enviarCmd(); return false; }"/>
+                                                 
+                                <p:remoteCommand name="enviarCmd" action="#{chatBean.enviarMensagem}" update=":formChat:painelChat :formChat:painelInbox" oncomplete="rolarParaFim();"/>
+                                
+                                <p:commandButton action="#{chatBean.enviarMensagem}" update=":formChat:painelChat :formChat:painelInbox" oncomplete="rolarParaFim();"
+                                                 icon="fas fa-paper-plane" styleClass="ui-button-success rounded-button p-3 shadow-3" style="height: 50px; width: 50px;"/>
+                            </div>
+                        </h:panelGroup>
+
+                        <h:panelGroup rendered="#{chatBean.conversaSelecionada.encerrada}">
+                            <div class="chat-input-area flex align-items-center justify-content-center bg-bluegray-900 border-top-1 border-white-alpha-10" style="padding: 1.5rem;">
+                                <div class="text-gray-400 text-sm font-bold flex align-items-center gap-2 bg-black-alpha-30 px-4 py-2 border-round-2xl border-1 border-bluegray-700 shadow-inset-1">
+                                    <i class="fas fa-lock text-red-400"></i> Chat encerrado. O placar desta partida já foi definido.
+                                </div>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                </h:panelGroup>
+
+            </div>
+        </h:form>
+
+ <script>
+            //<![CDATA[
+            let stompClientChat = null;
+            let currentSubscriptionChat = null;
+
+            function conectarWebSocketChat(tipoConversa, idConversa) {
+                if (!idConversa || !tipoConversa || idConversa === 'null' || idConversa === '') return;
+
+                let rotaSubscricao = '';
+                if (tipoConversa === 'JOGO') {
+                    rotaSubscricao = '/topic/chat/' + idConversa;
+                } else if (tipoConversa === 'LIGA') {
+                    rotaSubscricao = '/topic/chat/liga/' + idConversa;
+                }
+
+                if(stompClientChat !== null && stompClientChat.connected) {
+                    if(currentSubscriptionChat !== null) {
+                        currentSubscriptionChat.unsubscribe();
+                    }
+                    inscreverNaSala(rotaSubscricao);
+                } else {
+                    // MÁGICA AQUI: O caminho tem que ser exatamente o mesmo do seu WebSocketConfig.java!
+                    // E sem o 'http://localhost:8080', para funcionar em produção.
+                    let socket = new SockJS('/ws-arenamatch');
+                    stompClientChat = Stomp.over(socket);
+                    stompClientChat.debug = null; 
+                    
+                    stompClientChat.connect({}, function(frame) {
+                        inscreverNaSala(rotaSubscricao);
+                    });
+                }
+            }
+
+            function inscreverNaSala(rota) {
+                currentSubscriptionChat = stompClientChat.subscribe(rota, function(mensagem) {
+                    // Quando o grito do servidor chegar, aciona o botão invisível do PrimeFaces!
+                    rcAtualizarChat(); 
+                });
+            }
+
+            function rolarParaFim() {
+                let div = document.getElementById('painelMensagensScroll');
+                if(div) {
+                    div.scrollTop = div.scrollHeight;
+                }
+            }
+            //]]>
+        </script>
+    </ui:define>
+</ui:composition>

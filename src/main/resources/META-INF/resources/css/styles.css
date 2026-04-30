@@ -1,0 +1,87 @@
+@charset "UTF-8";
+
+/* =========================================
+   1. ESTILOS GLOBAIS E BACKGROUND (RECUPERADOS)
+   ========================================= */
+body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Imagem de Fundo Oficial do App e Login */
+    background: linear-gradient(rgba(10, 20, 35, 0.85), rgba(10, 20, 35, 0.95)), 
+                url('https://images.unsplash.com/photo-1518091043644-c1d4457512c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover; 
+    background-attachment: fixed; 
+    background-position: center;
+    color: #e2e8f0; 
+    min-height: 100vh;
+}
+
+/* Utilitários Gerais Vitais */
+.text-neon { color: #0ea5e9; }
+.bg-glass { background: rgba(30, 41, 59, 0.7) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1) !important; }
+.rounded-btn { border-radius: 8px !important; }
+
+/* Navbar Customizada (Caso seja usada na tela de Login) */
+.navbar {
+    background: rgba(15, 23, 42, 0.95); border-bottom: 2px solid #0ea5e9;
+    padding: 0 20px; height: 70px; display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-size: 1.5rem; font-weight: 800; color: #0ea5e9; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+.logo span { color: #fff; }
+
+/* --- CORES: CONVITES DE LIGAS (ROXO E VERMELHO) --- */
+.borda-liga-pendente {
+    border-color: #a855f7 !important; 
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.4) !important;
+}
+
+.borda-liga-recusada {
+    border-color: #f43f5e !important; 
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.4) !important;
+    opacity: 0.8;
+}
+
+.dot.liga { 
+    background: #a855f7; 
+    border-color: rgba(168, 85, 247, 0.45); 
+    box-shadow: 0 0 5px #a855f7; 
+}
+
+
+/* =========================================
+   2. CLASSES ESTRUTURAIS DO MENU (BACKUP)
+   ========================================= */
+.app-container { display: flex; min-height: 100vh; }
+
+.sidebar-new {
+    width: 280px; height: 100vh; position: fixed; left: 0; top: 0; z-index: 100;
+    display: flex; flex-direction: column; padding: 1.5rem;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.content-new {
+    margin-left: 280px; flex-grow: 1; padding: 2rem; max-width: calc(1400px + 280px);
+}
+
+.nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 1rem; border-radius: 12px;
+    color: rgba(255,255,255,0.7) !important; text-decoration: none; margin-bottom: 0.5rem;
+    transition: all 0.2s; font-weight: 500;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #fff !important; }
+.nav-item.active {
+    background: rgba(14, 165, 233, 0.15); color: #0ea5e9 !important;
+    border: 1px solid rgba(14, 165, 233, 0.3); font-weight: 700;
+}
+
+@media (max-width: 991px) {
+    .sidebar-new { display: none; }
+    .content-new { margin-left: 0; padding-bottom: 80px; }
+    .bottom-nav {
+        display: flex !important; position: fixed; bottom: 0; left: 0; right: 0;
+        height: 70px; background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1);
+        z-index: 1000; justify-content: space-around; align-items: center;
+    }
+}

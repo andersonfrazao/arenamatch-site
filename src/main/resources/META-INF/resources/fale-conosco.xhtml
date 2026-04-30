@@ -1,0 +1,49 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template/layout.xhtml">
+
+    <ui:define name="conteudo">
+        <h:form id="formContato">
+            <p:growl id="msgs" showDetail="true" />
+            
+            <div class="flex justify-content-center align-items-center mb-4">
+                <div class="bg-glass p-5 border-round-xl shadow-4 w-full max-w-30rem" style="border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(15, 23, 42, 0.6);">
+                    
+                    <div class="text-center mb-4">
+                        <i class="fas fa-headset text-blue-400 text-5xl mb-3"></i>
+                        <h2 class="text-white font-bold text-2xl m-0">Fale Conosco</h2>
+                        <p class="text-gray-400 text-sm mt-2">
+                            Olá, <strong class="text-white">#{sessaoBean.usuarioLogado.nome}</strong>! Como podemos ajudar o seu time hoje?
+                        </p>
+                    </div>
+
+                    <div class="field mb-4 mt-4">
+                        <p:outputLabel for="assunto" value="Assunto" styleClass="text-white font-bold mb-2 block"/>
+                        <p:selectOneMenu id="assunto" value="#{faleConoscoBean.assunto}" required="true" requiredMessage="Selecione um assunto" styleClass="w-full custom-input">
+                            <f:selectItem itemLabel="Selecione..." itemValue="" noSelectionOption="true"/>
+                            <f:selectItem itemLabel="Dúvida" itemValue="DÚVIDA"/>
+                            <f:selectItem itemLabel="Sugestão de Melhoria" itemValue="SUGESTÃO"/>
+                            <f:selectItem itemLabel="Reportar Erro/Bug" itemValue="ERRO"/>
+                            <f:selectItem itemLabel="Denúncia" itemValue="DENÚNCIA"/>
+                            <f:selectItem itemLabel="Outros" itemValue="OUTROS"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="field mb-4">
+                        <p:outputLabel for="mensagem" value="Mensagem" styleClass="text-white font-bold mb-2 block"/>
+                        <p:inputTextarea id="mensagem" value="#{faleConoscoBean.mensagem}" required="true" requiredMessage="Escreva uma mensagem"
+                                         rows="6" maxlength="500" counter="display" counterTemplate="{0} caracteres restantes." 
+                                         autoResize="false" styleClass="w-full custom-input" placeholder="Detalhe aqui a sua situação..."/>
+                        <h:outputText id="display" styleClass="text-xs text-gray-500 mt-1 block text-right" />
+                    </div>
+
+                    <p:commandButton value="Enviar Mensagem" action="#{faleConoscoBean.enviar}" update="@form" 
+                                     icon="fas fa-paper-plane" styleClass="ui-button-warning w-full font-bold shadow-3 rounded-btn p-2 text-lg" />
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

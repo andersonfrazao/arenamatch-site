@@ -1,0 +1,130 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/template/layout.xhtml">
+
+    <ui:define name="conteudo">
+
+        <div class="mb-4">
+            <h1 class="text-white text-3xl font-bold m-0">
+                Olá, <span class="text-neon">#{sessaoBean.usuarioLogado.nome}</span>!
+            </h1>
+            <p class="text-gray-400 text-lg mt-1">O campo está pronto. O que vamos jogar hoje?</p>
+        </div>
+
+        <div class="grid">
+            
+            <div class="col-12">
+                <div class="bg-glass p-4 border-round-xl shadow-4 border-top-3 border-green-500 flex flex-column lg:flex-row align-items-center justify-content-between gap-4 relative overflow-hidden">
+                    
+                    <div class="flex align-items-center gap-4 w-full lg:w-auto z-1">
+                        <div class="border-circle bg-gray-800 flex align-items-center justify-content-center border-1 border-gray-600 shadow-3" 
+                             style="width: 80px; height: 80px; flex-shrink: 0;">
+                            <i class="fas fa-shield-alt text-4xl text-white"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="text-white font-bold text-2xl mb-1">#{dashboardBean.time.nome}</div>
+                            <div class="flex align-items-center gap-3">
+                                <span class="text-green-400 text-sm font-bold"><i class="fas fa-check-circle mr-1"></i> Perfil Ativo</span>
+                                <p:link outcome="/cadastro" value="Editar Perfil" styleClass="text-gray-400 text-sm no-underline hover:text-white transition-colors-200">
+                                    <i class="fas fa-pen ml-1"></i>
+                                </p:link>
+                            </div>
+                            
+                            <div class="mt-2 pt-2 border-top-1 border-gray-700 w-full" style="max-width: 250px;">
+                                <div class="flex justify-content-between align-items-center mb-1">
+                                    <span class="text-gray-400 text-xs font-bold uppercase">Trial: #{dashboardBean.diasRestantesTrial} dias</span>
+                                    <p:link value="Assinar" styleClass="text-warning text-xs font-bold no-underline hover:text-white"/>
+                                </div>
+                                <p:progressBar value="#{dashboardBean.diasRestantesTrial * 6.6}" displayOnly="true" styleClass="h-05rem bg-gray-700"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-column sm:flex-row align-items-center gap-3 w-full lg:w-auto z-1">
+                        
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <p:button icon="fas fa-futbol" value="0 Convites" 
+                                      styleClass="ui-button-warning rounded-btn font-bold shadow-2 flex-1 sm:flex-none" title="Convites de Partida" />
+                                      
+                            <p:button icon="fas fa-users" value="0 Ligas" 
+                                      styleClass="ui-button-help rounded-btn font-bold shadow-2 flex-1 sm:flex-none" title="Convites de Ligas" />
+                        </div>
+
+                        <p:button value="Acessar Minha Agenda" outcome="/minha-agenda" icon="far fa-calendar-alt" 
+                                  styleClass="ui-button-success font-bold rounded-btn w-full sm:w-auto shadow-4 text-xl px-4 py-3" />
+                    </div>
+                    
+                    <i class="far fa-calendar-check text-8xl text-white-alpha-10 absolute right-0 mb-n4 mr-n4" style="bottom: -10px;"></i>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="bg-glass p-5 border-round-xl shadow-4 relative overflow-hidden transition-duration-200 hover:shadow-6 border-left-3 border-blue-500 flex flex-column md:flex-row align-items-center justify-content-between gap-4">
+                    <div class="z-1 relative w-full md:w-8">
+                        <h2 class="text-white m-0 text-3xl font-bold"><i class="fas fa-search-location mr-3 text-blue-400"></i>Buscar Adversário</h2>
+                        <p class="text-gray-300 mt-2 mb-0 text-lg line-height-3">
+                            Encontre os melhores adversários disponíveis na sua região. Filtre por data, categoria e proximidade para marcar o próximo grande jogo do seu time.
+                        </p>
+                    </div>
+                    
+                    <div class="z-1 relative w-full md:w-auto">
+                        <p:button outcome="/busca-time" value="Procurar Jogo Agora" 
+                                  icon="fas fa-crosshairs" 
+                                  styleClass="ui-button-primary font-bold rounded-btn w-full md:w-auto shadow-4 text-xl px-5 py-3"/>
+                    </div>
+                    
+                    <i class="fas fa-map-marked-alt text-8xl text-white-alpha-10 absolute right-0 mb-n4 mr-n4" style="bottom: -20px;"></i>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="bg-glass p-5 border-round-xl shadow-4 h-full relative overflow-hidden transition-duration-200 hover:shadow-6 border-top-3 border-purple-500 flex flex-column justify-content-between">
+                    <div class="z-1 relative mb-4">
+                        <h2 class="text-white m-0 text-2xl"><i class="fas fa-trophy mr-2 text-purple-400"></i> Ligas &amp; Comunidades</h2>
+                        <p class="text-gray-400 mt-2">
+                            Organize os times parceiros, acompanhe a tabela de classificação e mantenha sua panela ativa.
+                        </p>
+                    </div>
+
+                    <div class="z-1 relative mt-auto">
+                        <p:button outcome="/minhas-ligas" value="Gerenciar Minhas Ligas" icon="fas fa-cogs" 
+                                  styleClass="ui-button-help font-bold rounded-btn w-full shadow-3 text-lg py-3"/>
+                    </div>
+                    
+                    <i class="fas fa-users text-8xl text-white-alpha-10 absolute bottom-0 right-0 mb-n4 mr-n4"></i>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6">
+                <div class="bg-glass p-4 border-round-xl shadow-4 h-full">
+                    <div class="flex justify-content-between align-items-center mb-3">
+                        <h3 class="text-white m-0 text-lg"><i class="fas fa-fire text-orange-500 mr-2"></i> Ligas Movimentadas</h3>
+                        <p:link value="Ver todas" styleClass="text-blue-400 text-sm font-bold no-underline hover:text-white transition-colors-200"/>
+                    </div>
+
+                    <p:dataTable value="#{dashboardBean.ligasEmAlta}" var="liga" 
+                                 styleClass="ui-datatable-sm bg-transparent border-none" emptyMessage="Nenhuma liga em alta.">
+                        
+                        <p:column headerText="Nome da Liga" styleClass="bg-transparent text-white border-bottom-1 border-gray-700 border-top-none">
+                            <i class="fas fa-trophy text-yellow-500 mr-2"></i> <span class="font-bold text-lg">#{liga.nome}</span>
+                        </p:column>
+                        
+                        <p:column headerText="Equipes" styleClass="bg-transparent text-white border-bottom-1 border-gray-700 text-center border-top-none" width="100">
+                            <span class="bg-bluegray-800 px-3 py-1 border-round-xl text-sm shadow-1 font-bold text-gray-300">
+                                <i class="fas fa-shield-alt mr-1"></i>#{liga.qtdTimes}
+                            </span>
+                        </p:column>
+                        
+                        <p:column width="40" styleClass="bg-transparent border-bottom-1 border-gray-700 text-right border-top-none">
+                             <p:button icon="fas fa-chevron-right" styleClass="ui-button-flat ui-button-sm text-gray-500 hover:text-white p-0"/>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </div>
+
+        </div>
+
+    </ui:define>
+</ui:composition>

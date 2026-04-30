@@ -1,0 +1,88 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/layout.xhtml">
+                
+    <ui:define name="tituloPagina">Ranking Geral</ui:define>
+    <ui:define name="subtituloPagina">Os times mais vitoriosos</ui:define>
+
+    <ui:define name="conteudo">
+        
+        <style>
+            .tabela-ranking .ui-datatable-header,
+            .tabela-ranking .ui-state-default {
+                background: rgba(15, 23, 42, 0.6) !important;
+                border: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: #94a3b8 !important;
+                text-transform: uppercase;
+                font-size: 0.80rem;
+            }
+            .tabela-ranking .ui-datatable-data > tr {
+                background: transparent !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+            }
+            .tabela-ranking .ui-datatable-data > tr:hover {
+                background: rgba(255, 255, 255, 0.05) !important;
+            }
+            .tabela-ranking td {
+                border: none !important;
+                padding: 1rem 0.5rem !important; /* Reduzi o padding horizontal para caber melhor no mobile */
+            }
+            .table-wrapper {
+                overflow-x: auto;
+                border-radius: 16px;
+                padding-bottom: 1rem;
+            }
+            /* Destaca a coluna principal */
+            .col-vitorias {
+                background: rgba(34, 197, 94, 0.1); 
+                border-radius: 8px;
+            }
+        </style>
+
+        <div class="card shadow-4 p-0" style="background: rgba(15, 23, 42, 0.9); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            
+            <div class="p-3 border-bottom-1 border-white-alpha-10 text-white font-bold text-lg flex align-items-center gap-2">
+                <i class="fas fa-chart-line text-blue-400"></i> Desempenho
+            </div>
+
+            <div class="table-wrapper">
+                <p:dataTable value="#{rankingBean.ranking}" var="t" 
+                             styleClass="tabela-ranking" 
+                             rowStyleClass="text-white"
+                             rowIndexVar="index"
+                             emptyMessage="Nenhum time pontuou ainda nesta temporada.">
+                    
+                    <p:column headerText="Pos" width="45" styleClass="text-center font-bold">
+                        <h:panelGroup rendered="#{index == 0}"><i class="fas fa-medal text-2xl text-yellow-500" title="1º Lugar"></i></h:panelGroup>
+                        <h:panelGroup rendered="#{index == 1}"><i class="fas fa-medal text-xl text-gray-400" title="2º Lugar"></i></h:panelGroup>
+                        <h:panelGroup rendered="#{index == 2}"><i class="fas fa-medal text-lg text-orange-400" title="3º Lugar"></i></h:panelGroup>
+                        <h:outputText value="#{index + 1}º" rendered="#{index > 2}" styleClass="text-gray-400" />
+                    </p:column>
+                    
+                    <p:column headerText="Time" style="min-width: 140px;">
+                        <div class="flex align-items-center gap-2">
+                            <div class="flex align-items-center justify-content-center bg-bluegray-800 border-circle border-1 border-bluegray-600" style="width: 28px; height: 28px; flex-shrink: 0;">
+                                <i class="fas fa-shield-alt text-blue-400" style="font-size: 0.7rem;"></i>
+                            </div>
+                            <span class="font-bold text-md" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">#{t.nome}</span>
+                        </div>
+                    </p:column>
+                    
+                    <p:column headerText="V" width="45" styleClass="text-center text-green-400 font-bold text-lg col-vitorias">#{t.vitorias}</p:column>
+                    <p:column headerText="J" width="40" styleClass="text-center text-gray-400">#{t.partidasJogadas}</p:column>
+                    <p:column headerText="E" width="40" styleClass="text-center text-gray-400">#{t.empates}</p:column>
+                    <p:column headerText="D" width="40" styleClass="text-center text-red-400">#{t.derrotas}</p:column>
+                    
+                    <p:column headerText="GP" width="40" styleClass="text-center text-gray-300">#{t.golsPro}</p:column>
+                    <p:column headerText="GS" width="40" styleClass="text-center text-gray-400">#{t.golsContra}</p:column>
+                    <p:column headerText="SG" width="40" styleClass="text-center font-bold text-white">#{t.saldoGols}</p:column>
+                </p:dataTable>
+            </div>
+        </div>
+        
+    </ui:define> 
+</ui:composition>
