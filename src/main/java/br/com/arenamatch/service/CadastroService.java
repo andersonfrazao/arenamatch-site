@@ -19,7 +19,9 @@ import br.com.arenamatch.entity.Agenda;
 import br.com.arenamatch.entity.Time;
 import br.com.arenamatch.entity.Usuario;
 import br.com.arenamatch.enums.Perfil;
+import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.enums.StatusAssinatura;
+import br.com.arenamatch.enums.StatusPagamento;
 import br.com.arenamatch.repository.AgendaRepository;
 import br.com.arenamatch.repository.PartidaRepository;
 import br.com.arenamatch.repository.TimeRepository;
@@ -63,7 +65,10 @@ public class CadastroService {
 	        
 	        user.setPerfil(Perfil.REPRESENTANTE);
 	        user.setStatusAssinatura(StatusAssinatura.TRIAL);
-	        user.setDataExpiracao(LocalDateTime.now().plusDays(15));
+	        user.setPlanoAssinatura(PlanoAssinatura.TRIAL);
+	        user.setStatusPagamento(StatusPagamento.TRIAL);
+	        user.setDataInicioAssinatura(LocalDateTime.now());
+	        user.setDataExpiracao(LocalDateTime.now().plusDays(60));
 	        user.setDataAceiteTermos(LocalDateTime.now());
 	        
 	        user = usuarioRepo.save(user);

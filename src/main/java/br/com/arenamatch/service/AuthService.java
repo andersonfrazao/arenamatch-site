@@ -12,7 +12,6 @@ import br.com.arenamatch.dto.LoginDTO;
 import br.com.arenamatch.dto.UsuarioDTO;
 import br.com.arenamatch.entity.Time;
 import br.com.arenamatch.entity.Usuario;
-import br.com.arenamatch.enums.StatusAssinatura;
 import br.com.arenamatch.repository.TimeRepository;
 import br.com.arenamatch.repository.UsuarioRepository;
 
@@ -30,6 +29,9 @@ public class AuthService {
     
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private AssinaturaService assinaturaService;
 
     public UsuarioDTO autenticar(LoginDTO login) {
         Usuario usuario = repository.findByEmail(login.getEmail())
@@ -50,6 +52,8 @@ public class AuthService {
 		 * VALIDAÇÃO COM BCRYPT throw new RuntimeException("Senha incorreta"); }
 		 */
 
+        usuario = assinaturaService.atualizarTrialExpirado(usuario);
+
         UsuarioDTO dto = new UsuarioDTO();
         dto.setId(usuario.getId());
         dto.setNome(usuario.getNome());
@@ -58,19 +62,11 @@ public class AuthService {
         
         // Verifica Trial
         dto.setStatusAssinatura(usuario.getStatusAssinatura());
+        dto.setPlanoAssinatura(usuario.getPlanoAssinatura());
+        dto.setStatusPagamento(usuario.getStatusPagamento());
+        dto.setDataExpiracao(usuario.getDataExpiracao());
         
-        // Se a data de hoje for DEPOIS da data de expiração, está expirado
-        if (usuario.getDataExpiracao() != null && LocalDateTime.now().isAfter(usuario.getDataExpiracao())) {
-            dto.setExpirado(true);
-            
-            // Opcional: Atualizar status no banco se ainda estiver como TRIAL
-            if (StatusAssinatura.VENCIDO != usuario.getStatusAssinatura()) {
-                usuario.setStatusAssinatura(StatusAssinatura.VENCIDO);
-                repository.save(usuario);
-            }
-        } else {
-            dto.setExpirado(false);
-        }
+        dto.setExpirado(!assinaturaService.temAcessoCompleto(usuario));
         
         Time timeDoUsuario = timeRepository.findByResponsavelId(usuario.getId()).orElse(null);
 

@@ -22,6 +22,11 @@ public class FiltroAutenticacao implements Filter {
         String path = req.getContextPath();
         String url = req.getRequestURI();
 
+        if (url.contains("/api/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         // 1. LIBERAÇÃO TOTAL DE RECURSOS (Imprescindível para a Agenda carregar)
         boolean isResource = url.contains("jakarta.faces.resource") || url.contains("javax.faces.resource") ||
                              url.matches(".*(css|js|jpg|png|gif|woff|woff2|ttf|svg|eot).*");
@@ -32,7 +37,7 @@ public class FiltroAutenticacao implements Filter {
         
         // MÁGICA AQUI: Libera as rotas de API para o seu AuthClient (Feign) conseguir conversar com o backend!
         // Se a sua API tiver um prefixo diferente (ex: /v1/ ou /rest/), adicione aqui.
-        boolean isApiInterna = url.contains("/api/") || url.contains("/auth/") || url.endsWith("/login");
+        boolean isApiInterna = url.contains("/auth/") || url.endsWith("/login");
         
         boolean isPublicPage = isLoginPage || url.contains("cadastro") || url.contains("/ws-arenamatch") 
                 || isApiInterna || url.contains("senha") || url.contains("recuperar");

@@ -84,6 +84,17 @@ public interface TimeRepository extends JpaRepository<Time, Long> {
     
     List<Time> findByNomeContainingIgnoreCase(String nome);
     
-    @Query("SELECT t FROM Time t ORDER BY t.vitorias DESC, (t.golsPro - t.golsContra) DESC, t.golsPro DESC")
+    @Query("""
+            SELECT t FROM Time t
+            WHERE (
+                t.responsavel.planoAssinatura = br.com.arenamatch.enums.PlanoAssinatura.PRO
+                AND t.responsavel.statusPagamento = br.com.arenamatch.enums.StatusPagamento.PAGO
+            ) OR (
+                t.responsavel.planoAssinatura = br.com.arenamatch.enums.PlanoAssinatura.TRIAL
+                AND t.responsavel.statusPagamento = br.com.arenamatch.enums.StatusPagamento.TRIAL
+                AND t.responsavel.dataExpiracao > CURRENT_TIMESTAMP
+            )
+            ORDER BY t.vitorias DESC, (t.golsPro - t.golsContra) DESC, t.golsPro DESC
+            """)
     List<Time> buscarRankingGeral();
 }

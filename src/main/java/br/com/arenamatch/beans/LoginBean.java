@@ -2,7 +2,7 @@ package br.com.arenamatch.beans;
 
 import br.com.arenamatch.client.AuthClient;
 import br.com.arenamatch.dto.LoginDTO;
-import br.com.arenamatch.dto.UsuarioDTO;
+import br.com.arenamatch.dto.LoginResponseDTO;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -35,10 +35,11 @@ public class LoginBean implements Serializable {
             loginDTO.setSenha(senha);
 
             // Chama a API via Client
-            UsuarioDTO usuario = authClient.login(loginDTO);
+            LoginResponseDTO loginResponse = authClient.login(loginDTO);
 
-            if (usuario != null) {
-                sessaoBean.setUsuarioLogado(usuario);
+            if (loginResponse != null && loginResponse.getUsuario() != null) {
+                sessaoBean.setUsuarioLogado(loginResponse.getUsuario());
+                sessaoBean.setTokenJwt(loginResponse.getToken());
                 return "/minha-agenda?faces-redirect=true"; // Navegação
             }
         } catch (Exception e) {

@@ -29,6 +29,7 @@ public class PartidaService {
     @Autowired private PartidaRepository partidaRepository;
     @Autowired private TimeRepository timeRepository;
     @Autowired private NotificacaoService notificacaoService;
+    @Autowired private AssinaturaService assinaturaService;
     
     public List<PartidaDTO> listarProximosJogos(Long idTime) {
         Time time = timeRepository.findById(idTime)
@@ -133,6 +134,8 @@ public class PartidaService {
         
         Time desafiante = timeRepository.findById(dto.getIdTimeDesafiante()).orElseThrow();
         Time desafiado = timeRepository.findById(dto.getIdTimeDesafiado()).orElseThrow();
+
+        assinaturaService.validarAcessoCompleto(desafiante.getResponsavel());
 
         // ==========================================
         // 🚨 TRAVA DE SEGURANÇA: AGENDA DOS TIMES

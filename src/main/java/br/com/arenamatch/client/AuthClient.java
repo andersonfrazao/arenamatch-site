@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import br.com.arenamatch.dto.LoginDTO;
+import br.com.arenamatch.dto.LoginResponseDTO;
 import br.com.arenamatch.dto.RedefinirSenhaDTO;
-import br.com.arenamatch.dto.UsuarioDTO;
 
 @Component
 public class AuthClient {
@@ -18,13 +18,13 @@ public class AuthClient {
         this.restClient = restClient;
     }
 
-    public UsuarioDTO login(LoginDTO loginDTO) {
+    public LoginResponseDTO login(LoginDTO loginDTO) {
         return restClient.post()
                 .uri("/api/autenticacao/login") // <--- URL de negócio fixa aqui
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(loginDTO)
                 .retrieve()
-                .body(UsuarioDTO.class);
+                .body(LoginResponseDTO.class);
     }
     
     public void solicitarCodigoRecuperacao(String email) {

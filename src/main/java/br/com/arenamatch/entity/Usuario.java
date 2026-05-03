@@ -1,7 +1,9 @@
 package br.com.arenamatch.entity;
 
 import br.com.arenamatch.enums.Perfil;
+import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.enums.StatusAssinatura;
+import br.com.arenamatch.enums.StatusPagamento;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -36,6 +38,23 @@ public class Usuario {
 
     @Column(name = "data_expiracao")
     private LocalDateTime dataExpiracao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "plano_assinatura")
+    private PlanoAssinatura planoAssinatura;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_pagamento")
+    private StatusPagamento statusPagamento;
+
+    @Column(name = "data_inicio_assinatura")
+    private LocalDateTime dataInicioAssinatura;
+
+    @Column(name = "id_assinatura_externa")
+    private String idAssinaturaExterna;
+
+    @Column(name = "gateway_pagamento")
+    private String gatewayPagamento;
     
     @Column(name = "data_cadastro")
     private LocalDateTime dataCadastro = LocalDateTime.now();
