@@ -1,0 +1,1 @@
+ALTER TABLE time ADD COLUMN valor_taxa NUMERIC(10,2);

@@ -1,0 +1,1 @@
+ALTER TABLE usuario ADD COLUMN data_aceite_termos TIMESTAMP;

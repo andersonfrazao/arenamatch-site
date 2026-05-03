@@ -1,0 +1,1 @@
+ALTER TABLE time ADD COLUMN regiao VARCHAR(100);
