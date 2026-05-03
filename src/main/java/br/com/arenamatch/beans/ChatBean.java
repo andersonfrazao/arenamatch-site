@@ -3,8 +3,10 @@ package br.com.arenamatch.beans;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -41,6 +43,7 @@ public class ChatBean implements Serializable {
     @PostConstruct
     public void init() {
         carregarInbox();
+        selecionarConversaPorParametro();
     }
 
     public void carregarInbox() {
@@ -70,6 +73,46 @@ public class ChatBean implements Serializable {
         // 2. Atualiza a bolinha vermelha e recarrega msgs
         sessaoBean.atualizarNotificacoesChat();
         recarregarMensagens();
+    }
+
+    public String getTituloContextoConversa() {
+        if (conversaSelecionada == null) {
+            return "";
+        }
+
+        if ("LIGA".equals(conversaSelecionada.getTipo())) {
+            return "Grupo da Liga";
+        }
+
+        if ("PENDENTE".equals(conversaSelecionada.getStatusPartida())) {
+            return "Negociação para agendar jogo";
+        }
+
+        if ("AGENDADO".equals(conversaSelecionada.getStatusPartida())) {
+            return "Jogo marcado";
+        }
+
+        if ("CANCELADO".equals(conversaSelecionada.getStatusPartida())) {
+            return "Jogo cancelado";
+        }
+
+        return "Conversa de jogo";
+    }
+
+    public String getIconeContextoConversa() {
+        if (conversaSelecionada == null || "LIGA".equals(conversaSelecionada.getTipo())) {
+            return "fas fa-users";
+        }
+
+        if ("PENDENTE".equals(conversaSelecionada.getStatusPartida())) {
+            return "fas fa-handshake";
+        }
+
+        if ("AGENDADO".equals(conversaSelecionada.getStatusPartida())) {
+            return "fas fa-futbol";
+        }
+
+        return "fas fa-info-circle";
     }
 
     public void recarregarMensagens() {
@@ -105,5 +148,28 @@ public class ChatBean implements Serializable {
     public void chegouMensagemPeloWebSocket() {
         recarregarMensagens();
         carregarInbox(); 
+    }
+
+    private void selecionarConversaPorParametro() {
+        String idPartidaParam = FacesContext.getCurrentInstance()
+                .getExternalContext()
+                .getRequestParameterMap()
+                .get("p");
+
+        if (idPartidaParam == null || idPartidaParam.isBlank()) {
+            return;
+        }
+
+        try {
+            Long idPartida = Long.valueOf(idPartidaParam);
+            Optional<ConversaInboxDTO> conversa = inbox.stream()
+                    .filter(c -> "JOGO".equals(c.getTipo()))
+                    .filter(c -> idPartida.equals(c.getIdPartida()))
+                    .findFirst();
+
+            conversa.ifPresent(this::selecionarConversa);
+        } catch (NumberFormatException e) {
+            // Ignora parametro invalido.
+        }
     }
 }

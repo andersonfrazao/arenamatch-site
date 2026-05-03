@@ -19,6 +19,8 @@ public class EventoAgendaDTO {
     private String endereco;
     private String nomeTimeMandante;
     private String nomeTimeVisitante;
+    private String posicaoMeuTime;
+    private String posicaoAdversario;
     private String statusPlacar;  // "PENDENTE", "AGUARDANDO_CONFIRMACAO", "CONFIRMADO", "EM_DISPUTA"
     private Long idTimeQueInformou; // Para saber se fui eu ou o adversário que preencheu o placar primeiro
     private boolean passouDaHora; // Controle de tela para liberar a edição do placar

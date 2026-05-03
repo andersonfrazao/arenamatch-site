@@ -25,6 +25,13 @@
             .balao-meu { background: #065f46; color: white; border-bottom-right-radius: 4px; }
             .balao-outro { background: #334155; color: white; border-bottom-left-radius: 4px; }
             .hora-msg { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; text-align: right; display: block; }
+            .context-badge {
+                display: inline-flex; align-items: center; gap: .4rem; padding: .28rem .55rem; border-radius: 999px;
+                border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
+                color: rgba(255,255,255,0.86); font-size: .78rem; font-weight: 900; width: fit-content;
+            }
+            .context-badge.negociacao { color: #fde68a; border-color: rgba(234,179,8,0.35); background: rgba(234,179,8,0.12); }
+            .context-badge.marcado { color: #86efac; border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.12); }
         </style>
 
         <h:form id="formChat">
@@ -74,7 +81,8 @@
                                     <!-- NOVO BLOCO: DATA DA PARTIDA NA INBOX -->
                                     <h:panelGroup rendered="#{conv.tipo eq 'JOGO' and not empty conv.dataJogo}">
                                         <div class="text-blue-300 text-xs mb-1 flex align-items-center text-overflow-ellipsis overflow-hidden white-space-nowrap font-italic">
-                                            <i class="far fa-calendar-alt mr-1"></i> Marcada p/ 
+                                            <i class="#{conv.statusPartida eq 'PENDENTE' ? 'fas fa-handshake' : 'far fa-calendar-alt'} mr-1"></i>
+                                            #{conv.statusPartida eq 'PENDENTE' ? 'Negociando p/' : 'Marcada p/'}
                                             <h:outputText value="#{conv.dataJogo}" styleClass="ml-1 font-bold">
                                                 <f:convertDateTime pattern="dd/MM 'às' HH:mm" type="localDateTime"/>
                                             </h:outputText>
@@ -139,7 +147,10 @@
                                     <div class="text-white font-bold text-xl">#{chatBean.conversaSelecionada.nomeAdversario}</div>
                                     <div class="text-sm text-gray-400 flex align-items-center gap-2">
                                         <h:panelGroup rendered="#{chatBean.conversaSelecionada.tipo eq 'JOGO'}">
-                                            <i class="fas fa-futbol text-blue-400"></i> Partida marcada para 
+                                            <span class="context-badge #{chatBean.conversaSelecionada.statusPartida eq 'PENDENTE' ? 'negociacao' : 'marcado'}">
+                                                <i class="#{chatBean.iconeContextoConversa}"></i> #{chatBean.tituloContextoConversa}
+                                            </span>
+                                            <span>para</span>
                                             <h:outputText value="#{chatBean.conversaSelecionada.dataJogo}">
                                                 <f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" type="localDateTime"/>
                                             </h:outputText>

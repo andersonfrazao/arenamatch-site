@@ -30,6 +30,7 @@ public class PartidaService {
     @Autowired private TimeRepository timeRepository;
     @Autowired private NotificacaoService notificacaoService;
     @Autowired private AssinaturaService assinaturaService;
+    @Autowired private ParametroSistemaService parametroSistemaService;
     
     public List<PartidaDTO> listarProximosJogos(Long idTime) {
         Time time = timeRepository.findById(idTime)
@@ -110,6 +111,16 @@ public class PartidaService {
     @Transactional
     public void criarDesafio(DesafioDTO dto) {
         java.time.LocalDate dataJogo = dto.getDataHoraPartida().toLocalDate();
+        int minDiasAntecedencia = parametroSistemaService.buscarInteiro(
+                ParametroSistemaService.MIN_DIAS_ANTECEDENCIA_AGENDAMENTO,
+                3
+        );
+        java.time.LocalDate dataMinimaPermitida = java.time.LocalDate.now().plusDays(minDiasAntecedencia);
+
+        if (dataJogo.isBefore(dataMinimaPermitida)) {
+            throw new RuntimeException("O jogo precisa ser marcado com pelo menos "
+                    + minDiasAntecedencia + " dias de antecedência.");
+        }
         
         boolean ocupado = partidaRepository.isTimeOcupadoNoDia(
             dto.getIdTimeDesafiado(), 

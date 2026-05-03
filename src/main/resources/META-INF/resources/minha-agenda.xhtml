@@ -31,7 +31,7 @@
             
             .day-card {
                 padding: .75rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.10);
-                background: rgba(255,255,255,0.05); min-height: 90px; cursor:pointer;
+                background: rgba(255,255,255,0.05); min-height: 124px; cursor:pointer;
                 display:flex; flex-direction:column; justify-content:space-between;
                 text-decoration: none !important; color: white !important;
                 transition: transform .08s ease, border-color .08s ease;
@@ -52,6 +52,39 @@
             .dot.game { background: #25d366; border-color: rgba(37,211,102,0.35); box-shadow: 0 0 5px #25d366; }
             .dot.invite { background: #ffcc00; border-color: rgba(255,204,0,0.45); box-shadow: 0 0 5px #ffcc00; }
             .dot.cancelled { background: #ef4444; border-color: rgba(239, 68, 68, 0.5); box-shadow: 0 0 5px #ef4444; }            
+
+            .event-tags { display: flex; flex-direction: column; gap: .25rem; margin-top: .55rem; min-height: 22px; }
+            .event-tag {
+                display: inline-flex; align-items: center; gap: .3rem; width: fit-content; max-width: 100%;
+                padding: .18rem .42rem; border-radius: 999px; font-size: .68rem; font-weight: 900;
+                border: 1px solid rgba(255,255,255,0.14); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .event-tag.game { color: #86efac; background: rgba(37,211,102,0.12); border-color: rgba(37,211,102,0.28); }
+            .event-tag.invite { color: #fde68a; background: rgba(255,204,0,0.10); border-color: rgba(255,204,0,0.30); }
+            .event-tag.liga { color: #d8b4fe; background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.30); }
+            .event-tag.cancelled { color: #fecaca; background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.32); }
+
+            .role-badge {
+                display: inline-flex; align-items: center; gap: .35rem; padding: .28rem .55rem; border-radius: 999px;
+                border: 1px solid rgba(56,189,248,0.28); background: rgba(56,189,248,0.10);
+                color: #bae6fd; font-size: .75rem; font-weight: 900; white-space: nowrap;
+            }
+
+            .match-location {
+                display: flex; align-items: flex-start; gap: .65rem; width: 100%;
+                margin: .65rem 0 .35rem; padding: .75rem; border-radius: 12px;
+                border: 1px solid rgba(56,189,248,0.20); background: rgba(15, 23, 42, 0.50);
+            }
+
+            .match-location-icon {
+                width: 34px; height: 34px; min-width: 34px; border-radius: 10px;
+                display: flex; align-items: center; justify-content: center;
+                color: #38bdf8; background: rgba(56,189,248,0.10); border: 1px solid rgba(56,189,248,0.25);
+            }
+
+            .match-location-text { min-width: 0; flex: 1; }
+            .match-location-title { color: #bae6fd; font-size: .72rem; font-weight: 900; text-transform: uppercase; margin-bottom: .2rem; }
+            .match-location-address { color: rgba(255,255,255,0.88); font-size: .88rem; line-height: 1.35; overflow-wrap: anywhere; word-break: normal; }
 
             .detailsHead { display:flex; align-items:center; justify-content:space-between; gap: 1rem; margin-bottom: .8rem; }
             .item-lista {
@@ -134,6 +167,21 @@
                                         <h:panelGroup rendered="#{minhaAgendaBean.temConviteLigaPendenteNoDia(dia.data)}" styleClass="dot liga"/>
                                         <h:panelGroup rendered="#{dia.temCancelado or minhaAgendaBean.temConviteLigaRecusadoNoDia(dia.data)}" styleClass="dot cancelled"/>
                                     </div>
+
+                                    <div class="event-tags">
+                                        <h:panelGroup rendered="#{dia.temJogoConfirmado}" layout="block" styleClass="event-tag game">
+                                            <i class="fas fa-check-circle"></i> Jogo
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{dia.temDesafioPendente}" layout="block" styleClass="event-tag invite">
+                                            <i class="fas fa-clock"></i> Pendente
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{minhaAgendaBean.temConviteLigaPendenteNoDia(dia.data)}" layout="block" styleClass="event-tag liga">
+                                            <i class="fas fa-trophy"></i> Liga
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{dia.temCancelado or minhaAgendaBean.temConviteLigaRecusadoNoDia(dia.data)}" layout="block" styleClass="event-tag cancelled">
+                                            <i class="fas fa-ban"></i> Cancelado
+                                        </h:panelGroup>
+                                    </div>
                                 </h:panelGroup>
                             </p:commandLink>
                         </ui:repeat>
@@ -185,12 +233,27 @@
                                 
                                 <div class="font-bold text-white text-xl flex align-items-center gap-2 flex-wrap mb-2">
                                     #{evento.titulo}
+                                    <h:panelGroup rendered="#{evento.tipo eq 'GAME' or evento.tipo eq 'INVITE_RECEIVED' or evento.tipo eq 'INVITE_SENT'}">
+                                        <span class="role-badge">
+                                            <i class="fas fa-users"></i> Adversário: #{evento.posicaoAdversario}
+                                        </span>
+                                    </h:panelGroup>
                                     <h:panelGroup rendered="#{evento.distanciaKm ne null}">
                                         <span class="text-xs bg-bluegray-700 px-2 py-1 border-round text-gray-300 font-normal shadow-1" style="white-space: nowrap;">
                                             <i class="fas fa-map-marker-alt mr-1 text-red-400"></i>#{evento.distanciaKm} km
                                         </span>
                                     </h:panelGroup>
                                 </div>
+
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME'}" layout="block" styleClass="match-location">
+                                    <div class="match-location-icon">
+                                        <i class="fas fa-location-dot"></i>
+                                    </div>
+                                    <div class="match-location-text">
+                                        <div class="match-location-title">Local do jogo</div>
+                                        <div class="match-location-address">#{evento.endereco}</div>
+                                    </div>
+                                </h:panelGroup>
 
                                 <h:panelGroup rendered="#{not empty evento.mensagem and (evento.tipo eq 'INVITE_RECEIVED' or evento.tipo eq 'CANCELLATION_RECEIVED' or evento.tipo eq 'CANCELLATION_SENT' or evento.tipo eq 'CANCELLED')}" layout="block" styleClass="mb-3">
                                     <div class="bg-white-alpha-10 p-3 border-round text-sm italic text-gray-200 border-left-3 border-yellow-500 shadow-2">
@@ -381,6 +444,10 @@
                                                              action="#{minhaAgendaBean.recusarConvite(evento)}" 
                                                              update=":formAgenda @([id$=painelNotificacoesGlobais]) globalForm:msgs" 
                                                              styleClass="rounded-button ui-button-danger shadow-3" style="width: 35px; height: 35px;"/>
+
+                                            <p:button value="Negociar" outcome="/chat.xhtml" icon="far fa-comments" styleClass="ui-button-secondary rounded-btn text-sm font-bold shadow-2">
+                                                <f:param name="p" value="#{evento.idPartida}" />
+                                            </p:button>
                                         </h:panelGroup>
 
                                         <h:panelGroup rendered="#{evento.tipo eq 'INVITE_SENT'}">
@@ -388,6 +455,16 @@
                                                              action="#{minhaAgendaBean.cancelarEnvio(evento)}" 
                                                              update=":formAgenda @([id$=painelNotificacoesGlobais]) globalForm:msgs" 
                                                              styleClass="ui-button-danger ui-button-outlined rounded-btn text-sm font-bold shadow-2"/>
+
+                                            <p:button value="Negociar" outcome="/chat.xhtml" icon="far fa-comments" styleClass="ui-button-secondary rounded-btn text-sm font-bold shadow-2">
+                                                <f:param name="p" value="#{evento.idPartida}" />
+                                            </p:button>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{evento.tipo eq 'GAME'}">
+                                            <p:button value="Abrir chat" outcome="/chat.xhtml" icon="far fa-comments" styleClass="ui-button-secondary rounded-btn text-sm font-bold shadow-2">
+                                                <f:param name="p" value="#{evento.idPartida}" />
+                                            </p:button>
                                         </h:panelGroup>
                                     </div>
                                 </h:panelGroup>

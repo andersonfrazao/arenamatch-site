@@ -45,7 +45,7 @@ public class AgendaController {
         
         // O Controller apenas repassa o ID para o Service e devolve o resultado!
         List<PartidaDTO> partidas = partidaService.listarProximosJogos(idTime);
-        
+
         return ResponseEntity.ok(partidas);
     }
 

@@ -90,23 +90,34 @@ public class AgendaService {
         boolean souMandante = p.getMandante().getId().equals(meuTimeId);
         Time adversario = souMandante ? p.getVisitante() : p.getMandante();
         Time meuTime = souMandante ? p.getMandante() : p.getVisitante(); 
+        dto.setPosicaoAdversario(adversario.isMandoCampo() ? "Mandante" : "Visitante");
 
         Time donoDoCampo = definirDonoDoCampo(p);
                 
         dto.setIdTimeAdversario(adversario.getId());
         dto.setCidade(adversario.getCidade());
-        dto.setValorTaxa(donoDoCampo.getValorTaxa()); 
+        dto.setValorTaxa(donoDoCampo != null ? donoDoCampo.getValorTaxa() : null);
         dto.setTemCampo(donoDoCampo != null && donoDoCampo.getId().equals(meuTimeId)); 
         
         // Tratamento do Endereço (Mantido)
         List<String> partes = new ArrayList<>();
-        if (donoDoCampo.getLogradouro() != null && !donoDoCampo.getLogradouro().trim().isEmpty()) {
+        if (donoDoCampo != null && donoDoCampo.getLogradouro() != null && !donoDoCampo.getLogradouro().trim().isEmpty()) {
             partes.add(donoDoCampo.getLogradouro().trim());
         }
-        if (donoDoCampo.getNumero() != null && !donoDoCampo.getNumero().trim().isEmpty()) {
+        if (donoDoCampo != null && donoDoCampo.getNumero() != null && !donoDoCampo.getNumero().trim().isEmpty()) {
             partes.add(donoDoCampo.getNumero().trim());
         }
-        dto.setEndereco(donoDoCampo.getLogradouro() != null ? String.join(", ", partes) : "Endereço não cadastrado");
+        if (donoDoCampo != null && donoDoCampo.getBairro() != null && !donoDoCampo.getBairro().trim().isEmpty()) {
+            partes.add(donoDoCampo.getBairro().trim());
+        }
+        if (donoDoCampo != null && donoDoCampo.getCidade() != null && !donoDoCampo.getCidade().trim().isEmpty()) {
+            String cidadeUf = donoDoCampo.getCidade().trim();
+            if (donoDoCampo.getUf() != null && !donoDoCampo.getUf().trim().isEmpty()) {
+                cidadeUf += "/" + donoDoCampo.getUf().trim();
+            }
+            partes.add(cidadeUf);
+        }
+        dto.setEndereco(!partes.isEmpty() ? String.join(", ", partes) : "Endereço não cadastrado");
 
         // Cálculo de Distância (Mantido)
         if (meuTime.getLatitude() != null && adversario.getLatitude() != null) {
