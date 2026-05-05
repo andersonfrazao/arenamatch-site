@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.arenamatch.dto.LoginDTO;
 import br.com.arenamatch.dto.LoginResponseDTO;
+import br.com.arenamatch.dto.AtivacaoContaDTO;
 import br.com.arenamatch.dto.RedefinirSenhaDTO;
 import br.com.arenamatch.dto.UsuarioDTO;
 import br.com.arenamatch.repository.UsuarioRepository;
@@ -55,6 +56,12 @@ public class AuthController {
     @PostMapping("/ativacao/reenviar")
     public ResponseEntity<Void> reenviarCodigoAtivacao(@RequestBody String email) {
         service.solicitarCodigoAtivacao(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/ativacao/confirmar")
+    public ResponseEntity<Void> confirmarAtivacao(@RequestBody AtivacaoContaDTO dto) {
+        service.ativarConta(dto.getEmail(), dto.getCodigo());
         return ResponseEntity.ok().build();
     }
 }

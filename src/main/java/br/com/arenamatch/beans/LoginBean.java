@@ -11,7 +11,6 @@ import jakarta.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
 import java.io.Serializable;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClientResponseException;
 
 @Named
@@ -24,15 +23,6 @@ public class LoginBean implements Serializable {
     @Getter @Setter
     private String senha;
 
-    @Getter @Setter
-    private String codigoAtivacao;
-
-    @Getter
-    private boolean mostrarCodigoAtivacao;
-
-    @Value("${arenamatch.validation.email-activation-enabled:true}")
-    private boolean ativacaoEmailHabilitada;
-
     @Inject
     private AuthClient authClient; // Injeção do Feign Client
 
@@ -44,7 +34,6 @@ public class LoginBean implements Serializable {
             LoginDTO loginDTO = new LoginDTO();
             loginDTO.setEmail(email);
             loginDTO.setSenha(senha);
-            loginDTO.setCodigoAtivacao(codigoAtivacao);
 
             // Chama a API via Client
             LoginResponseDTO loginResponse = authClient.login(loginDTO);
@@ -59,8 +48,12 @@ public class LoginBean implements Serializable {
             if (mensagem == null || mensagem.trim().isEmpty()) {
                 mensagem = "Usuario ou senha invalidos.";
             }
-            if (ativacaoEmailHabilitada && mensagem.toLowerCase().contains("codigo de ativacao")) {
-                mostrarCodigoAtivacao = true;
+            if (mensagem.toLowerCase().contains("pendente de ativacao")) {
+                FacesContext.getCurrentInstance().getExternalContext().getFlash().put("emailAtivacao", email);
+                FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "Ativacao pendente", mensagem));
+                return "/ativar-conta.xhtml?faces-redirect=true";
             }
             FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", mensagem));
@@ -71,21 +64,4 @@ public class LoginBean implements Serializable {
         return null; // Fica na mesma tela
     }
 
-    public void reenviarCodigoAtivacao() {
-        try {
-            authClient.reenviarCodigoAtivacao(email);
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Codigo de ativacao reenviado."));
-        } catch (RestClientResponseException e) {
-            String mensagem = e.getResponseBodyAsString();
-            if (mensagem == null || mensagem.trim().isEmpty()) {
-                mensagem = "Nao foi possivel reenviar o codigo.";
-            }
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", mensagem));
-        } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Nao foi possivel reenviar o codigo."));
-        }
-    }
 }

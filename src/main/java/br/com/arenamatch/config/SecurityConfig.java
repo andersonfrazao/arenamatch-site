@@ -29,7 +29,7 @@ public class SecurityConfig {
                     "/ws-arenamatch/**",
                     "/api/autenticacao/login",
                     "/api/autenticacao/recuperar-senha/**",
-                    "/api/autenticacao/ativacao/reenviar",
+                    "/api/autenticacao/ativacao/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/v3/api-docs/**"

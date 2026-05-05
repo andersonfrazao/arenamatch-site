@@ -231,8 +231,12 @@ public class CadastroBean implements Serializable {
             } else {
                 // FLUXO DE CRIAÇÃO (Novo Cadastro)
                 cadastroClient.salvarTime(this.dto);
-                msgInfo("Cadastro finalizado com sucesso! Foi enviado um codigo para seu e-mail para a ativacao da conta no primeiro acesso.");
                 FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+                if (ativacaoEmailHabilitada) {
+                    msgInfo("Cadastro finalizado com sucesso! Foi enviado um codigo para seu e-mail para a ativacao da conta no primeiro acesso.");
+                    return "/ativar-conta.xhtml?faces-redirect=true";
+                }
+                msgInfo("Cadastro finalizado com sucesso! Faca login.");
                 return "/login.xhtml?faces-redirect=true";
             }
 

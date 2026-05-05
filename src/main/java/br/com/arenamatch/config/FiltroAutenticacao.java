@@ -39,7 +39,7 @@ public class FiltroAutenticacao implements Filter {
         // Se a sua API tiver um prefixo diferente (ex: /v1/ ou /rest/), adicione aqui.
         boolean isApiInterna = url.contains("/auth/") || url.endsWith("/login");
         
-        boolean isPublicPage = isLoginPage || url.contains("cadastro") || url.contains("/ws-arenamatch") 
+        boolean isPublicPage = isLoginPage || url.contains("cadastro") || url.contains("ativar-conta") || url.contains("/ws-arenamatch") 
                 || isApiInterna || url.contains("senha") || url.contains("recuperar");
         // 3. VERIFICAÇÃO DE SESSÃO
         boolean isLogado = (session != null && session.getAttribute("usuarioAutenticado") != null);

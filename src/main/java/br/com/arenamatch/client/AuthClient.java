@@ -6,6 +6,7 @@ import org.springframework.web.client.RestClient;
 
 import br.com.arenamatch.dto.LoginDTO;
 import br.com.arenamatch.dto.LoginResponseDTO;
+import br.com.arenamatch.dto.AtivacaoContaDTO;
 import br.com.arenamatch.dto.RedefinirSenhaDTO;
 
 @Component
@@ -52,6 +53,19 @@ public class AuthClient {
         restClient.post()
                 .uri("/api/autenticacao/ativacao/reenviar")
                 .body(email)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public void ativarConta(String email, String codigo) {
+        AtivacaoContaDTO dto = new AtivacaoContaDTO();
+        dto.setEmail(email);
+        dto.setCodigo(codigo);
+
+        restClient.post()
+                .uri("/api/autenticacao/ativacao/confirmar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(dto)
                 .retrieve()
                 .toBodilessEntity();
     }

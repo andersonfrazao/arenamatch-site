@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      lang="pt-br">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Arena Match - Ativar Conta</title>
+    <link href="https://unpkg.com/primeflex@3.1.2/primeflex.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+
+    <style>
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(10, 20, 35, 0.8), rgba(10, 20, 35, 0.9)),
+                        url('https://images.unsplash.com/photo-1518091043644-c1d4457512c6?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1920&amp;q=80');
+            background-size: cover; background-position: center;
+            height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .login-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%; max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
+        }
+
+        .login-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #0ea5e9, #22d3ee);
+        }
+
+        .header-icon { text-align: center; font-size: 3rem; color: #0ea5e9; margin-bottom: 15px; }
+        h2 { text-align: center; color: #fff; margin: 0 0 10px 0; font-size: 1.5rem; }
+        p.desc { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.5; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b; z-index: 2;}
+
+        .custom-input {
+            width: 100%; padding: 12px 12px 12px 45px !important;
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid #334155 !important; border-radius: 8px !important;
+            color: #fff !important; font-size: 1rem !important; outline: none; box-sizing: border-box;
+            box-shadow: none !important;
+        }
+
+        .custom-input:focus { border-color: #0ea5e9 !important; }
+
+        .code-input {
+            text-align: center !important; letter-spacing: 15px !important; font-size: 1.5rem !important; font-weight: bold !important;
+            padding-left: 12px !important;
+            color: #0ea5e9 !important;
+        }
+
+        .btn-action {
+            width: 100%; padding: 14px;
+            background: linear-gradient(90deg, #0ea5e9 0%, #0284c7 100%);
+            border: none; border-radius: 8px;
+            color: #fff; font-weight: bold; font-size: 1rem; text-transform: uppercase;
+            cursor: pointer; transition: 0.3s;
+            text-align: center; display: block; text-decoration: none;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4); color: #fff;}
+
+        .back-link {
+            display: block; text-align: center; margin-top: 20px;
+            color: #64748b; text-decoration: none; font-size: 0.9rem; transition: 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+    </style>
+</h:head>
+<h:body>
+
+    <div class="login-card">
+        <h:form id="formAtivacao">
+            <p:messages id="messages" showDetail="true" closable="true" styleClass="mb-3">
+                <p:autoUpdate/>
+            </p:messages>
+
+            <div class="header-icon"><i class="fas fa-envelope-open-text"></i></div>
+            <h2>Ative sua conta</h2>
+            <p class="desc">Digite seu e-mail e o codigo de 5 digitos enviado ao finalizar o cadastro.</p>
+
+            <div class="input-group">
+                <i class="fas fa-envelope input-icon"></i>
+                <p:inputText value="#{ativacaoContaBean.email}" placeholder="Digite seu e-mail cadastrado"
+                             required="true" requiredMessage="O e-mail e obrigatorio." styleClass="custom-input"/>
+            </div>
+
+            <div class="input-group">
+                <p:inputMask value="#{ativacaoContaBean.codigo}" mask="99999" placeholder="_ _ _ _ _"
+                             required="true" requiredMessage="O codigo e obrigatorio." styleClass="custom-input code-input"/>
+            </div>
+
+            <p:commandLink action="#{ativacaoContaBean.ativarConta}" update="@form" styleClass="btn-action">
+                <h:outputText value="ATIVAR CONTA"/>
+            </p:commandLink>
+
+            <p:commandLink action="#{ativacaoContaBean.reenviarCodigo}" update="@form" process="@form" styleClass="back-link">
+                <h:outputText value="Reenviar codigo de ativacao"/>
+            </p:commandLink>
+
+            <a href="login.xhtml" class="back-link"><i class="fas fa-arrow-left"></i> Voltar ao Login</a>
+        </h:form>
+    </div>
+
+</h:body>
+</html>

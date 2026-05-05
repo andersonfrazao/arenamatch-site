@@ -47,7 +47,7 @@ public class AuthService {
         }
 
         if (StatusUsuario.PENDENTE_ATIVACAO.equals(usuario.getStatusUsuario())) {
-            validarCodigoAtivacao(usuario, login.getCodigoAtivacao());
+            throw new RuntimeException("Conta pendente de ativacao. Ative sua conta com o codigo enviado para seu e-mail.");
         }
         
 		/*
@@ -80,6 +80,17 @@ public class AuthService {
         }
         
         return dto;
+    }
+
+    public void ativarConta(String email, String codigoInformado) {
+        Usuario usuario = repository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "E-mail nao encontrado."));
+
+        if (!StatusUsuario.PENDENTE_ATIVACAO.equals(usuario.getStatusUsuario())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Esta conta ja esta ativa.");
+        }
+
+        validarCodigoAtivacao(usuario, codigoInformado);
     }
 
     private void validarCodigoAtivacao(Usuario usuario, String codigoInformado) {
