@@ -77,12 +77,23 @@
                 </span>
             </div>
 
+            <h:panelGroup layout="block" styleClass="field mb-4" rendered="#{loginBean.mostrarCodigoAtivacao}">
+                <span class="ui-input-icon-left w-full">
+                    <i class="pi pi-key" />
+                    <p:inputMask value="#{loginBean.codigoAtivacao}" mask="99999" placeholder="Codigo de ativacao" styleClass="w-full"/>
+                </span>
+            </h:panelGroup>
+
             <div class="flex justify-content-between align-items-center mb-4 text-sm">
                 <div class="flex align-items-center">
                     <p:selectBooleanCheckbox id="lembrar" itemLabel="Lembrar" styleClass="mr-2"/>
                 </div>
                 <a href="recuperar-senha.xhtml" class="text-neon no-underline hover:text-white font-bold">Esqueci a senha</a>
             </div>
+
+            <p:commandLink value="Reenviar codigo de ativacao" action="#{loginBean.reenviarCodigoAtivacao}" process="@form" update="msgs"
+                           rendered="#{loginBean.mostrarCodigoAtivacao}"
+                           styleClass="block text-center text-neon no-underline hover:text-white font-bold text-sm mb-4"/>
 
             <p:commandButton value="ENTRAR EM CAMPO" action="#{loginBean.logar}" update="msgs" icon="pi pi-sign-in"
                              styleClass="w-full rounded-btn font-bold border-none shadow-4" 

@@ -22,6 +22,15 @@ public class EmailService {
         mailSender.send(mensagem);
     }
     
+    public void enviarCodigoAtivacao(String destinatario, String codigo) {
+        SimpleMailMessage mensagem = new SimpleMailMessage();
+        mensagem.setTo(destinatario);
+        mensagem.setSubject("Arena Match - Codigo de ativacao");
+        mensagem.setText("Ola!\n\nSeu codigo de ativacao do Arena Match e: " + codigo + "\n\nEste codigo e valido por 15 minutos.");
+
+        mailSender.send(mensagem);
+    }
+    
     public void enviarEmailSuporte(FaleConoscoDTO dto) {
     	
         SimpleMailMessage mensagem = new SimpleMailMessage();

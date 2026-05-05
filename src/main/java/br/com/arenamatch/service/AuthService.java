@@ -12,6 +12,7 @@ import br.com.arenamatch.dto.LoginDTO;
 import br.com.arenamatch.dto.UsuarioDTO;
 import br.com.arenamatch.entity.Time;
 import br.com.arenamatch.entity.Usuario;
+import br.com.arenamatch.enums.StatusUsuario;
 import br.com.arenamatch.repository.TimeRepository;
 import br.com.arenamatch.repository.UsuarioRepository;
 
@@ -43,6 +44,10 @@ public class AuthService {
         	}
         }else if (!usuario.getSenha().equals(login.getSenha())) { // Lembre-se: em produção use BCrypt
             throw new RuntimeException("Senha incorreta");
+        }
+
+        if (StatusUsuario.PENDENTE_ATIVACAO.equals(usuario.getStatusUsuario())) {
+            validarCodigoAtivacao(usuario, login.getCodigoAtivacao());
         }
         
 		/*
@@ -76,6 +81,26 @@ public class AuthService {
         
         return dto;
     }
+
+    private void validarCodigoAtivacao(Usuario usuario, String codigoInformado) {
+        if (codigoInformado == null || codigoInformado.trim().isEmpty()) {
+            throw new RuntimeException("Informe o codigo de ativacao enviado para seu e-mail.");
+        }
+
+        if (usuario.getCodigoAtivacaoEmail() == null || !usuario.getCodigoAtivacaoEmail().equals(codigoInformado.trim())) {
+            throw new RuntimeException("Codigo de ativacao invalido.");
+        }
+
+        if (usuario.getValidadeCodigoAtivacaoEmail() == null
+                || LocalDateTime.now().isAfter(usuario.getValidadeCodigoAtivacaoEmail())) {
+            throw new RuntimeException("O codigo de ativacao expirou. Solicite um novo codigo.");
+        }
+
+        usuario.setStatusUsuario(StatusUsuario.ATIVO);
+        usuario.setCodigoAtivacaoEmail(null);
+        usuario.setValidadeCodigoAtivacaoEmail(null);
+        repository.save(usuario);
+    }
     
     // ... injetar UsuarioRepository e PasswordEncoder se já não estiverem injetados
 
@@ -91,6 +116,23 @@ public class AuthService {
         repository.save(usuario);
 
         emailService.enviarCodigoRecuperacao(email, codigo); // Se falhar aqui, o Spring gera um 500 automaticamente
+    }
+
+    public void solicitarCodigoAtivacao(String email) {
+        Usuario usuario = repository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "E-mail nao encontrado."));
+
+        if (!StatusUsuario.PENDENTE_ATIVACAO.equals(usuario.getStatusUsuario())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Esta conta ja esta ativa.");
+        }
+
+        String codigo = String.format("%05d", new java.security.SecureRandom().nextInt(100000));
+
+        usuario.setCodigoAtivacaoEmail(codigo);
+        usuario.setValidadeCodigoAtivacaoEmail(LocalDateTime.now().plusMinutes(15));
+        repository.save(usuario);
+
+        emailService.enviarCodigoAtivacao(email, codigo);
     }
 
     public void redefinirSenha(String email, String codigo, String novaSenha) {

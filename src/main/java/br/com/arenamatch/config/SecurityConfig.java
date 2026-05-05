@@ -2,6 +2,7 @@ package br.com.arenamatch.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,10 +29,12 @@ public class SecurityConfig {
                     "/ws-arenamatch/**",
                     "/api/autenticacao/login",
                     "/api/autenticacao/recuperar-senha/**",
+                    "/api/autenticacao/ativacao/reenviar",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/v3/api-docs/**"
                 ).permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/cadastro").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )

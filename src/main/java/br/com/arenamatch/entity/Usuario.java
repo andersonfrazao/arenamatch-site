@@ -4,6 +4,7 @@ import br.com.arenamatch.enums.Perfil;
 import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.enums.StatusAssinatura;
 import br.com.arenamatch.enums.StatusPagamento;
+import br.com.arenamatch.enums.StatusUsuario;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -73,6 +74,16 @@ public class Usuario {
     
     @Column(name = "data_aceite_termos")
     private LocalDateTime dataAceiteTermos;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_usuario")
+    private StatusUsuario statusUsuario = StatusUsuario.ATIVO;
+
+    @Column(name = "codigo_ativacao_email")
+    private String codigoAtivacaoEmail;
+
+    @Column(name = "validade_codigo_ativacao_email")
+    private LocalDateTime validadeCodigoAtivacaoEmail;
     
     // Método auxiliar
     public boolean isExpirado() {

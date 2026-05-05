@@ -51,4 +51,10 @@ public class AuthController {
     	service.redefinirSenha(dto.getEmail(), dto.getCodigo(), dto.getNovaSenha());
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/ativacao/reenviar")
+    public ResponseEntity<Void> reenviarCodigoAtivacao(@RequestBody String email) {
+        service.solicitarCodigoAtivacao(email);
+        return ResponseEntity.ok().build();
+    }
 }

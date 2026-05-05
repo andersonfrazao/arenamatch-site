@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.primefaces.event.FlowEvent;
+import org.springframework.beans.factory.annotation.Value;
 
 import br.com.arenamatch.client.CadastroClient;
 import br.com.arenamatch.client.ViaCepClient;
@@ -15,6 +16,7 @@ import br.com.arenamatch.dto.DisponibilidadeDTO;
 import br.com.arenamatch.dto.EnderecoDTO;
 import br.com.arenamatch.dto.CategoriaDTO;
 import br.com.arenamatch.enums.Categoria;
+import br.com.arenamatch.service.CpfValidator;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -47,6 +49,14 @@ public class CadastroBean implements Serializable {
 
     @Inject private ViaCepClient viaCepClient;
     @Inject private CadastroClient cadastroClient;
+    @Inject private CpfValidator cpfValidator;
+
+    @Getter
+    @Value("${arenamatch.validation.email-activation-enabled:true}")
+    private boolean ativacaoEmailHabilitada;
+
+    @Value("${arenamatch.validation.cpf-enabled:true}")
+    private boolean validacaoCpfHabilitada;
     @Inject private SessaoBean sessaoBean; // Injeção para controlar o fluxo de edição
 
     @PostConstruct
@@ -82,7 +92,19 @@ public class CadastroBean implements Serializable {
             boolean isNovaSenhaInformada = dto.getSenha() != null && !dto.getSenha().trim().isEmpty();
             boolean isNovoCadastro = !sessaoBean.isLogado();
 
+            if (isNovoCadastro && validacaoCpfHabilitada && !cpfValidator.isValido(dto.getCpf())) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "CPF invalido", "Informe um CPF valido para continuar."));
+                return "responsavel";
+            }
+
             if (isNovoCadastro || isNovaSenhaInformada) {
+                if (dto.getSenha() == null || dto.getSenha().length() < 6) {
+                    FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Senha muito curta", "A senha precisa ter no minimo 6 caracteres."));
+                    return "responsavel";
+                }
+
                 if (dto.getSenha() == null || !dto.getSenha().equals(confirmarSenha)) {
                     FacesContext.getCurrentInstance().addMessage(null, 
                         new FacesMessage(FacesMessage.SEVERITY_ERROR, "Senhas não conferem", "Verifique os campos de senha."));
@@ -209,13 +231,15 @@ public class CadastroBean implements Serializable {
             } else {
                 // FLUXO DE CRIAÇÃO (Novo Cadastro)
                 cadastroClient.salvarTime(this.dto);
-                msgInfo("Cadastro realizado com sucesso! Faça login.");
+                msgInfo("Cadastro finalizado com sucesso! Foi enviado um codigo para seu e-mail para a ativacao da conta no primeiro acesso.");
                 FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
                 return "/login.xhtml?faces-redirect=true";
             }
 
         } catch (org.springframework.web.client.RestClientResponseException e) {
             String msgServidor = e.getResponseBodyAsString();
+            System.err.println("[ERRO AO FINALIZAR CADASTRO] HTTP " + e.getStatusCode() + " - " + msgServidor);
+            e.printStackTrace();
             
             if (msgServidor == null || msgServidor.trim().isEmpty()) {
                 msgErro("Erro ao processar a requisição. Código: " + e.getStatusCode());
@@ -225,8 +249,9 @@ public class CadastroBean implements Serializable {
             }
             return null;
         } catch (Exception e) {
-            msgErro("Erro ao finalizar o processo.");
+            System.err.println("[ERRO AO FINALIZAR CADASTRO]");
             e.printStackTrace();
+            msgErro("Erro ao finalizar o processo.");
             return null;
         }
     }

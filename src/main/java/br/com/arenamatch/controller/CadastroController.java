@@ -20,12 +20,12 @@ public class CadastroController {
     @Autowired private CadastroService service;
 
     @PostMapping
-    public ResponseEntity<Void> cadastrar(@RequestBody CadastroDTO dto) {
+    public ResponseEntity<?> cadastrar(@RequestBody CadastroDTO dto) {
         try {
             service.criarConta(dto);
             return ResponseEntity.status(201).build();
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build(); // Simplificado
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     

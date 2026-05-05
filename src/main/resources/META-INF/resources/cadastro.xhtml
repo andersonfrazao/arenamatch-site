@@ -122,6 +122,12 @@
                                     <p:inputMask value="#{cadastroBean.dto.celular}" mask="(99) 99999-9999" styleClass="custom-input" required="true" requiredMessage="Celular é obrigatório"/>
                                 </div>
                                 <div class="form-group full-width">
+                                    <h:panelGroup rendered="#{not sessaoBean.logado and cadastroBean.ativacaoEmailHabilitada}" layout="block" styleClass="info-box">
+                                        <i class="fas fa-envelope-circle-check" style="font-size: 1.2rem; margin-top:2px;"></i>
+                                        <div>
+                                            Informe um e-mail válido. Ao finalizar o cadastro, enviaremos um código de verificação para ativar sua conta no primeiro acesso.
+                                        </div>
+                                    </h:panelGroup>
                                     <p:outputLabel for="email" value="E-mail" styleClass="text-gray-300 font-bold mb-2 block"/>
                                     <p:inputText id="email" value="#{cadastroBean.dto.email}" 
                                                  styleClass="w-full custom-input" 
@@ -173,7 +179,7 @@
                                     <i class="fas fa-info-circle" style="font-size: 1.2rem; margin-top:2px;"></i>
                                     <div>
                                         <strong>Dica de Localização:</strong><br/>
-                                        Mesmo que o time não tenha uma "casa" fixa, coloque um CEP aproximado da região onde costumam jogar. Isso é essencial para aparecer nas buscas de proximidade!
+                                        Mesmo que o time não tenha uma "casa" fixa, coloque um CEP aproximado da região do seu time. Isso é essencial para aparecer nas buscas de proximidade!
                                     </div>
                                 </div>
 

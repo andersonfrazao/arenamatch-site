@@ -47,4 +47,12 @@ public class AuthClient {
                 .retrieve()
                 .toBodilessEntity();
     }
+
+    public void reenviarCodigoAtivacao(String email) {
+        restClient.post()
+                .uri("/api/autenticacao/ativacao/reenviar")
+                .body(email)
+                .retrieve()
+                .toBodilessEntity();
+    }
 }

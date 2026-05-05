@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder; // Importante
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import br.com.arenamatch.enums.Perfil;
 import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.enums.StatusAssinatura;
 import br.com.arenamatch.enums.StatusPagamento;
+import br.com.arenamatch.enums.StatusUsuario;
 import br.com.arenamatch.repository.AgendaRepository;
 import br.com.arenamatch.repository.PartidaRepository;
 import br.com.arenamatch.repository.TimeRepository;
@@ -37,19 +39,33 @@ public class CadastroService {
     @Autowired private PasswordEncoder passwordEncoder; // Injeta o BCrypt configurado
     @Autowired private GoogleMapsGeoClient googleMapsGeoClient;
     @Autowired private PartidaRepository partidaRepo;
+    @Autowired private EmailService emailService;
+    @Autowired private CpfValidator cpfValidator;
+
+    @Value("${arenamatch.validation.email-activation-enabled:true}")
+    private boolean emailActivationEnabled;
+
+    @Value("${arenamatch.validation.cpf-enabled:true}")
+    private boolean cpfValidationEnabled;
 
     @Transactional
     public void criarConta(CadastroDTO dto) {
         
     	try {
 	    	String cpfLimpo = limparMascara(dto.getCpf());
+            if (cpfValidationEnabled && !cpfValidator.isValido(cpfLimpo)) {
+                throw new RuntimeException("CPF invalido.");
+            }
+            if (dto.getSenha() == null || dto.getSenha().length() < 6) {
+                throw new RuntimeException("A senha precisa ter no minimo 6 caracteres.");
+            }
 	        String celularLimpo = limparMascara(dto.getCelular()); // Boa prática limpar celular também
 	    	
 	        // 1. Validação de Duplicidade
 	        if (usuarioRepo.findByEmail(dto.getEmail()).isPresent()) {
 	            throw new RuntimeException("Este E-mail já está em uso.");
 	        }
-	        if (usuarioRepo.findByCpf(dto.getCpf()).isPresent()) {
+	        if (usuarioRepo.findByCpf(cpfLimpo).isPresent()) {
 	            throw new RuntimeException("Este CPF já possui cadastro.");
 	        }
 	
@@ -70,6 +86,13 @@ public class CadastroService {
 	        user.setDataInicioAssinatura(LocalDateTime.now());
 	        user.setDataExpiracao(LocalDateTime.now().plusDays(60));
 	        user.setDataAceiteTermos(LocalDateTime.now());
+            if (emailActivationEnabled) {
+                user.setStatusUsuario(StatusUsuario.PENDENTE_ATIVACAO);
+                user.setCodigoAtivacaoEmail(gerarCodigoNumerico());
+                user.setValidadeCodigoAtivacaoEmail(LocalDateTime.now().plusMinutes(15));
+            } else {
+                user.setStatusUsuario(StatusUsuario.ATIVO);
+            }
 	        
 	        user = usuarioRepo.save(user);
 	
@@ -142,6 +165,10 @@ public class CadastroService {
 	            }
 	        
 	        }
+
+            if (emailActivationEnabled) {
+                emailService.enviarCodigoAtivacao(user.getEmail(), user.getCodigoAtivacaoEmail());
+            }
     	}catch (Exception e) {
 			throw new RuntimeException("Erro ao criar a conta "+e.getMessage());
 		}
@@ -308,6 +335,10 @@ public class CadastroService {
         if (valor == null) return null;
         // Regex: Substitui tudo que NÃO for número ([^0-9]) por vazio
         return valor.replaceAll("[^0-9]", "");
+    }
+
+    private String gerarCodigoNumerico() {
+        return String.format("%05d", new java.security.SecureRandom().nextInt(100000));
     }
     
     
