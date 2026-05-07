@@ -30,9 +30,12 @@ public class LoginBean implements Serializable {
     private SessaoBean sessaoBean;
 
     public String logar() {
+        String emailNormalizado = email != null ? email.trim() : null;
+        email = emailNormalizado;
+
         try {
             LoginDTO loginDTO = new LoginDTO();
-            loginDTO.setEmail(email);
+            loginDTO.setEmail(emailNormalizado);
             loginDTO.setSenha(senha);
 
             // Chama a API via Client
@@ -49,7 +52,7 @@ public class LoginBean implements Serializable {
                 mensagem = "Usuario ou senha invalidos.";
             }
             if (mensagem.toLowerCase().contains("pendente de ativacao")) {
-                FacesContext.getCurrentInstance().getExternalContext().getFlash().put("emailAtivacao", email);
+                FacesContext.getCurrentInstance().getExternalContext().getFlash().put("emailAtivacao", emailNormalizado);
                 FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
                 FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_WARN, "Ativacao pendente", mensagem));

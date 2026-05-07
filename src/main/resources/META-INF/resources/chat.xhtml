@@ -32,6 +32,47 @@
             }
             .context-badge.negociacao { color: #fde68a; border-color: rgba(234,179,8,0.35); background: rgba(234,179,8,0.12); }
             .context-badge.marcado { color: #86efac; border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.12); }
+
+            @media (max-width: 768px) {
+                .chat-container {
+                    height: calc(100dvh - 210px);
+                    min-height: 420px;
+                    border-radius: 12px;
+                }
+                .inbox-panel {
+                    width: 100%;
+                    border-right: none;
+                }
+                .chat-header {
+                    padding: .75rem;
+                }
+                .chat-header > .flex {
+                    min-width: 0;
+                    width: 100%;
+                }
+                .chat-header .text-xl {
+                    font-size: 1rem !important;
+                    overflow-wrap: anywhere;
+                }
+                .chat-header .text-sm {
+                    flex-wrap: wrap;
+                    gap: .35rem !important;
+                }
+                .chat-messages {
+                    padding: .75rem;
+                }
+                .balao {
+                    max-width: 88%;
+                    font-size: .9rem;
+                    overflow-wrap: anywhere;
+                }
+                .chat-input-area {
+                    padding: .75rem;
+                }
+                .chat-input-area .ui-inputtextarea {
+                    font-size: 1rem !important;
+                }
+            }
         </style>
 
         <h:form id="formChat">

@@ -1,6 +1,7 @@
 package br.com.arenamatch.service;
 
 import br.com.arenamatch.repository.ParametroSistemaRepository;
+import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +19,24 @@ public class ParametroSistemaService {
         return parametroSistemaRepository.findById(chave)
                 .map(parametro -> converterInteiro(parametro.getValor(), valorPadrao))
                 .orElse(valorPadrao);
+    }
+
+    public int buscarMinDiasAntecedenciaAgendamento() {
+        return buscarInteiro(MIN_DIAS_ANTECEDENCIA_AGENDAMENTO, 3);
+    }
+
+    public void validarDataMinimaAgendamento(LocalDate dataJogo) {
+        int minDiasAntecedencia = buscarMinDiasAntecedenciaAgendamento();
+        LocalDate dataMinimaPermitida = LocalDate.now().plusDays(minDiasAntecedencia);
+
+        if (dataJogo.isBefore(dataMinimaPermitida)) {
+            throw new RuntimeException(mensagemMinDiasAntecedencia(minDiasAntecedencia));
+        }
+    }
+
+    public String mensagemMinDiasAntecedencia(int minDiasAntecedencia) {
+        return "Para agendar um jogo, precisa ter pelo menos um intervalo de "
+                + minDiasAntecedencia + " dias.";
     }
 
     private int converterInteiro(String valor, int valorPadrao) {

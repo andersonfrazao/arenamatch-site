@@ -27,6 +27,7 @@ public class BuscaService {
     @Autowired private PartidaRepository partidaRepo;
     @Autowired private UsuarioRepository usuarioRepo; 
     @Autowired private DistanciaService distanciaService;
+    @Autowired private ParametroSistemaService parametroSistemaService;
 
     public List<TimeResumoDTO> buscar(FiltroBuscaDTO filtro) {
         return new ArrayList<>(); 
@@ -42,6 +43,8 @@ public class BuscaService {
         if (data.isBefore(LocalDate.now())) {
             throw new RuntimeException("A data da busca não pode ser inferior à data atual.");
         }
+
+        parametroSistemaService.validarDataMinimaAgendamento(data);
 
         try {
             DayOfWeek diaSemanaJava = data.getDayOfWeek();

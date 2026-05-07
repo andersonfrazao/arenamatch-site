@@ -8,6 +8,7 @@ import java.util.List;
 
 import br.com.arenamatch.client.AgendaClient;
 import br.com.arenamatch.client.BuscaClient;
+import br.com.arenamatch.client.ParametroSistemaClient;
 import br.com.arenamatch.client.PartidaClient;
 import br.com.arenamatch.dto.DesafioDTO;
 import br.com.arenamatch.dto.FiltroBuscaDTO;
@@ -21,6 +22,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.client.RestClientResponseException;
 
 @Named
 @ViewScoped
@@ -37,6 +39,9 @@ public class BuscaBean implements Serializable {
     
     @Inject
     private AgendaClient agendaClient;
+
+    @Inject
+    private ParametroSistemaClient parametroSistemaClient;
     
     @Getter @Setter
     private FiltroBuscaDTO filtro = new FiltroBuscaDTO();
@@ -73,6 +78,14 @@ public class BuscaBean implements Serializable {
         if (filtro.getDataJogo().isBefore(LocalDate.now())) {
             this.resultados = new ArrayList<>();
             msgWarn("A data da busca não pode ser inferior à data atual.");
+            return;
+        }
+
+        try {
+            parametroSistemaClient.validarDataMinimaAgendamento(filtro.getDataJogo());
+        } catch (RestClientResponseException e) {
+            this.resultados = new ArrayList<>();
+            msgWarn(e.getResponseBodyAsString());
             return;
         }
 

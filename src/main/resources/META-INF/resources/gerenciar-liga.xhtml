@@ -28,6 +28,7 @@
                     <div class="bg-bluegray-900 p-4 border-round-xl shadow-4 h-full" style="border: 1px solid rgba(255,255,255,0.1);">
                         <h2 class="text-white text-lg m-0 mb-4"><i class="fas fa-users text-gray-400 mr-2"></i> Membros do Grupo (#{gerenciarLigaBean.ligaAtual.times.size()})</h2>
                         
+                        <div class="am-table-scroll">
                         <p:dataTable value="#{gerenciarLigaBean.ligaAtual.times}" var="membro" 
                                      styleClass="ui-datatable-sm bg-transparent" emptyMessage="Nenhum time na liga.">
                             
@@ -51,6 +52,7 @@
                                                   styleClass="ui-button-danger ui-button-flat ui-button-sm p-0"/>
                             </p:column>
                         </p:dataTable>
+                        </div>
                     </div>
                 </div>
 
@@ -59,7 +61,7 @@
                         <h2 class="text-purple-300 text-lg m-0 mb-3"><i class="fas fa-user-plus mr-2"></i> Adicionar ao Grupo</h2>
                         <div class="text-gray-400 text-sm mb-3">Pesquise pelo nome do time adversário para enviar um convite.</div>
                         
-                        <div class="flex gap-2 mb-4">
+                        <div class="flex flex-column sm:flex-row gap-2 mb-4">
                             <p:inputText value="#{gerenciarLigaBean.termoBusca}" placeholder="Ex: Tabajara FC" styleClass="w-full custom-input text-sm"/>
 								<p:commandButton icon="fas fa-search" action="#{gerenciarLigaBean.buscarTimesParaConvidar}" 
                  					update="@form" 
