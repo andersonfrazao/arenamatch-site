@@ -20,7 +20,15 @@
             }
 
             /* Header e Steps */
-            .wizard-header { background: rgba(15, 23, 42, 0.95); padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .wizard-header { background: rgba(15, 23, 42, 0.95); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .wizard-topbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+            .restart-link {
+                display: inline-flex; align-items: center; gap: 8px; color: #94a3b8;
+                border: 1px solid #475569; border-radius: 8px; padding: 8px 12px;
+                text-decoration: none; font-size: 0.85rem; font-weight: 700;
+                background: rgba(15, 23, 42, 0.45); transition: all 0.2s;
+            }
+            .restart-link:hover { color: #fff; border-color: #0ea5e9; background: rgba(14, 165, 233, 0.12); }
             .steps-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
             .step-line { width: 30px; height: 2px; background: #334155; }
             
@@ -66,7 +74,12 @@
             body .week-selector .ui-button:hover { border-color: #0ea5e9 !important; color: #fff !important; }
             
             /* Ajustes Mobile */
-            @media (max-width: 600px) { .input-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+            @media (max-width: 600px) {
+                .input-grid { grid-template-columns: 1fr; }
+                .full-width { grid-column: span 1; }
+                .wizard-topbar { justify-content: center; }
+                .steps-container { flex-wrap: wrap; }
+            }
             .ui-wizard-navbar { display: none; }
         </style>
 
@@ -76,6 +89,13 @@
             <div class="wizard-card">
                 
                 <h:panelGroup id="wizardHeader" layout="block" styleClass="wizard-header">
+                    <h:panelGroup rendered="#{not sessaoBean.logado}" layout="block" styleClass="wizard-topbar">
+                        <h:link outcome="/login.xhtml" styleClass="restart-link">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Voltar ao login</span>
+                        </h:link>
+                    </h:panelGroup>
+
                     <div class="steps-container">
                         <div class="step-item #{cadastroBean.stepAtual == 'responsavel' ? 'active' : ''}" style="display: flex; align-items: center; gap: 10px; opacity: #{cadastroBean.stepAtual == 'responsavel' ? '1' : '0.4'};">
                             <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #{cadastroBean.stepAtual == 'responsavel' ? '#0ea5e9' : '#334155'}; color: #fff; display: flex; align-items: center; justify-content: center;">1</div>

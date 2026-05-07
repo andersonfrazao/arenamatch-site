@@ -28,6 +28,7 @@
             }
             
             .gridWeek { display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: .55rem; }
+            .gridWeek > a { display: block; min-width: 0; text-decoration: none !important; }
             
             .day-card {
                 padding: .75rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.10);
@@ -96,6 +97,45 @@
                 width:46px; height:46px; border-radius: 16px; display:grid; place-items:center;
                 border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); flex-shrink: 0;
             }
+
+            @media (max-width: 640px) {
+                .panel-glass { padding: .75rem; border-radius: 14px; }
+                .calendarHeader {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: .75rem;
+                }
+                .legend {
+                    justify-content: flex-start;
+                    gap: .4rem;
+                }
+                .pill {
+                    font-size: .76rem;
+                    padding: .28rem .48rem;
+                }
+                .gridWeek {
+                    display: grid !important;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: .45rem;
+                    width: 100%;
+                }
+                .day-card {
+                    min-height: 104px;
+                    padding: .55rem;
+                    border-radius: 12px;
+                }
+                .dow { font-size: .74rem; }
+                .dnum { font-size: 1.12rem; }
+                .event-tag {
+                    max-width: 100%;
+                    font-size: .62rem;
+                    padding: .15rem .32rem;
+                }
+            }
+
+            @media (max-width: 340px) {
+                .gridWeek { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            }
         </style>
 
         <h:form id="formAgenda">
@@ -138,7 +178,9 @@
                         <div class="legend">
                             <span class="pill"><span class="dot game"></span> Confirmado</span>
                             <span class="pill"><span class="dot invite"></span> Amistoso Pendente</span>
+                            <!-- Legenda de liga pendente comentada temporariamente para retomada futura.
                             <span class="pill" style="border-color: #a855f7;"><span class="dot liga"></span> Liga Pendente</span>
+                            -->
                             <span class="pill"><span class="dot cancelled"></span> Cancelado/Recusado</span>
                         </div>
                     </div>

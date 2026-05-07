@@ -17,8 +17,8 @@ services:
       - "80:8080" # Liga a porta 80 da internet na porta 8080 do seu app
     environment:
       - SPRING_PROFILES_ACTIVE=prod # <--- AQUI ESTÁ O SEGREDO!
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/arenamatch_prod
-      - SPRING_DATASOURCE_USERNAME=arenamatch
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/arenamatch
+      - SPRING_DATASOURCE_USERNAME=arena
       - SPRING_DATASOURCE_PASSWORD=zu0EiphaWee6AechUngoo2ai
     depends_on:
       - db
