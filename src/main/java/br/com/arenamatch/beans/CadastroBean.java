@@ -119,7 +119,12 @@ public class CadastroBean implements Serializable {
 
     // --- LÓGICA DA AGENDA ---
     public void adicionarHorario() {
-        if (tempCategoria == null || tempDia == null || tempInicio == null || tempFim == null) {
+        if (tempCategoria == null) {
+            msgErro("Selecione a categoria.");
+            return;
+        }
+
+        if (tempDia == null || tempInicio == null || tempFim == null) {
             msgErro("Preencha todos os campos do horário.");
             return;
         }
