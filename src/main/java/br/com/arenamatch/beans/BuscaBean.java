@@ -14,6 +14,7 @@ import br.com.arenamatch.dto.DesafioDTO;
 import br.com.arenamatch.dto.FiltroBuscaDTO;
 import br.com.arenamatch.dto.TimeResumoDTO;
 import br.com.arenamatch.enums.Categoria;
+import br.com.arenamatch.enums.PlanoAssinatura;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -66,9 +67,12 @@ public class BuscaBean implements Serializable {
     @PostConstruct
     public void init() {
         this.resultados = new ArrayList<>();
+        aplicarLimiteRaioBasicoNaTela();
     }
 
     public void pesquisar() {
+        aplicarLimiteRaioBasicoNaTela();
+
         // 1. Validação da Data (Obrigatória)
         if (filtro.getDataJogo() == null) {
             msgWarn("Selecione uma data para realizar a busca.");
@@ -158,6 +162,28 @@ public class BuscaBean implements Serializable {
 
     private void carregarResultados(Long meuId) {
         this.resultados = buscaClient.filtrarTimes(filtro, meuId);
+    }
+
+    public boolean isPlanoBasico() {
+        return sessaoBean.getUsuarioLogado() != null
+                && sessaoBean.getUsuarioLogado().getPlanoAssinatura() == PlanoAssinatura.BASICO;
+    }
+
+    public Integer getRaioMaximoPlanoBasicoKm() {
+        return 10;
+    }
+
+    public void informarBloqueioRaioBasico() {
+        aplicarLimiteRaioBasicoNaTela();
+        msgWarn("O ajuste de distancia esta bloqueado no plano BASICO. Para buscar acima de "
+                + getRaioMaximoPlanoBasicoKm() + " km, mude para o plano PRO.");
+    }
+
+    private void aplicarLimiteRaioBasicoNaTela() {
+        if (isPlanoBasico()
+                && (filtro.getRaioKm() == null || filtro.getRaioKm() > getRaioMaximoPlanoBasicoKm())) {
+            filtro.setRaioKm(getRaioMaximoPlanoBasicoKm());
+        }
     }
 
     // Carrega o ID do time apenas uma vez e guarda em cache

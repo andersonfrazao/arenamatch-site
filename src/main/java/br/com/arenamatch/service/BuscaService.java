@@ -16,6 +16,7 @@ import br.com.arenamatch.dto.TimeResumoDTO;
 import br.com.arenamatch.entity.Partida;
 import br.com.arenamatch.entity.Time;
 import br.com.arenamatch.enums.Categoria;
+import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.repository.PartidaRepository;
 import br.com.arenamatch.repository.TimeRepository;
 import br.com.arenamatch.repository.UsuarioRepository;
@@ -56,6 +57,8 @@ public class BuscaService {
             Time meuTime = timeRepository.findById(idMeuTime)
                 .orElseThrow(() -> new RuntimeException("Time logado não encontrado"));
 
+            Double raioEfetivo = aplicarLimiteRaioPlanoBasico(meuTime, raio);
+
             boolean euJogoNesseDia = meuTime.getAgendas().stream()
                 .anyMatch(agenda -> agenda.getDiaSemana().equalsIgnoreCase(diaSemanaBanco));
 
@@ -67,7 +70,7 @@ public class BuscaService {
             List<Tuple> resultados = timeRepository.buscarPorLocalizacaoEDia(
                     meuTime.getLatitude(), 
                     meuTime.getLongitude(), 
-                    raio, 
+                    raioEfetivo, 
                     nome, 
                     meuTime.getId(),
                     data,
@@ -153,5 +156,19 @@ public class BuscaService {
             case SUNDAY: return "Domingo";
             default: return "";
         }
+    }
+
+    private Double aplicarLimiteRaioPlanoBasico(Time meuTime, Double raioSolicitado) {
+        if (meuTime.getResponsavel() == null
+                || meuTime.getResponsavel().getPlanoAssinatura() != PlanoAssinatura.BASICO) {
+            return raioSolicitado;
+        }
+
+        int raioMaximo = parametroSistemaService.buscarRaioMaximoBuscaPlanoBasicoKm();
+        if (raioSolicitado == null || raioSolicitado > raioMaximo) {
+            return (double) raioMaximo;
+        }
+
+        return raioSolicitado;
     }
 }

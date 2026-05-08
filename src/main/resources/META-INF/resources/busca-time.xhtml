@@ -40,10 +40,20 @@
                         
                         <div class="mt-2">
                             <h:inputHidden id="txtRaio" value="#{buscaBean.filtro.raioKm}" />
-                            <p:slider for="txtRaio" minValue="5" maxValue="100" step="5" range="false" 
+                            <p:slider for="txtRaio" minValue="5" maxValue="#{buscaBean.planoBasico ? buscaBean.raioMaximoPlanoBasicoKm : 100}" step="5" range="false" 
                                       display="displayRaio" displayTemplate="{value} km" 
+                                      disabled="#{buscaBean.planoBasico}"
                                       style="background: #334155; height: 6px; border:none;"/>
                         </div>
+                        <h:panelGroup rendered="#{buscaBean.planoBasico}" layout="block" styleClass="mt-2">
+                            <p:commandLink action="#{buscaBean.informarBloqueioRaioBasico}" update="messages displayRaio txtRaio"
+                                           process="@this"
+                                           styleClass="text-xs font-bold no-underline"
+                                           style="color: #fbbf24;">
+                                <i class="fas fa-lock mr-1"></i>
+                                Plano BASICO: busca limitada a #{buscaBean.raioMaximoPlanoBasicoKm} km. Mude para o PRO para ajustar.
+                            </p:commandLink>
+                        </h:panelGroup>
                     </div>
 
                     <div class="field col-12 md:col-2 flex align-items-end">

@@ -11,6 +11,7 @@ public class ParametroSistemaService {
     public static final String DIAS_INTERVALO_AGENDAMENTO_PLANO_BASICO = "DIAS_INTERVALO_AGENDAMENTO_PLANO_BASICO";
     public static final String DIAS_TRIAL = "DIAS_TRIAL";
     public static final String DIAS_CONFIRMACAO_AUTOMATICA_PLACAR = "DIAS_CONFIRMACAO_AUTOMATICA_PLACAR";
+    public static final String RAIO_MAXIMO_BUSCA_PLANO_BASICO_KM = "RAIO_MAXIMO_BUSCA_PLANO_BASICO_KM";
 
     private final ParametroSistemaRepository parametroSistemaRepository;
 
@@ -38,6 +39,10 @@ public class ParametroSistemaService {
 
     public int buscarDiasConfirmacaoAutomaticaPlacar() {
         return buscarInteiro(DIAS_CONFIRMACAO_AUTOMATICA_PLACAR, 3);
+    }
+
+    public int buscarRaioMaximoBuscaPlanoBasicoKm() {
+        return buscarInteiro(RAIO_MAXIMO_BUSCA_PLANO_BASICO_KM, 10);
     }
 
     public void validarDataMinimaAgendamento(LocalDate dataJogo) {
