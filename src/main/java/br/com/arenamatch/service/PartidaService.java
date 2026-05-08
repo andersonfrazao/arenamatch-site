@@ -1,6 +1,7 @@
 package br.com.arenamatch.service;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -18,6 +19,7 @@ import br.com.arenamatch.dto.PartidaDTO;
 import br.com.arenamatch.dto.TimeResumoDTO;
 import br.com.arenamatch.entity.Partida;
 import br.com.arenamatch.entity.Time;
+import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.enums.StatusPartida;
 import br.com.arenamatch.enums.StatusPlacar;
 import br.com.arenamatch.repository.PartidaRepository;
@@ -146,7 +148,7 @@ public class PartidaService {
         Time desafiante = timeRepository.findById(dto.getIdTimeDesafiante()).orElseThrow();
         Time desafiado = timeRepository.findById(dto.getIdTimeDesafiado()).orElseThrow();
 
-        assinaturaService.validarAcessoCompleto(desafiante.getResponsavel());
+        validarPermissaoParaCriarDesafio(desafiante);
 
         // ==========================================
         // 🚨 TRAVA DE SEGURANÇA: AGENDA DOS TIMES
@@ -227,6 +229,35 @@ public class PartidaService {
         }
 
         return desafiado;
+    }
+
+    private void validarPermissaoParaCriarDesafio(Time desafiante) {
+        if (assinaturaService.temAcessoCompleto(desafiante.getResponsavel())) {
+            return;
+        }
+
+        if (desafiante.getResponsavel() == null
+                || desafiante.getResponsavel().getPlanoAssinatura() != PlanoAssinatura.BASICO) {
+            assinaturaService.validarAcessoCompleto(desafiante.getResponsavel());
+            return;
+        }
+
+        int intervaloDias = parametroSistemaService.buscarDiasIntervaloAgendamentoPlanoBasico();
+        List<Partida> partidasAtivas = partidaRepository.buscarPartidasFuturasAtivasPorTime(desafiante.getId());
+        if (partidasAtivas.isEmpty()) {
+            return;
+        }
+
+        Partida ultimaPartidaAtiva = partidasAtivas.get(0);
+        LocalDate proximaDataPermitida = ultimaPartidaAtiva.getDataHora().toLocalDate().plusDays(intervaloDias);
+        LocalDate hoje = LocalDate.now();
+
+        if (hoje.isBefore(proximaDataPermitida)) {
+            long diasRestantes = ChronoUnit.DAYS.between(hoje, proximaDataPermitida);
+            String diaTexto = diasRestantes == 1 ? "1 dia" : diasRestantes + " dias";
+            throw new RuntimeException("Voce ja tem jogo agendado ou desafio enviado! Seu plano BASICO so permite agendar jogos a cada "
+                    + intervaloDias + " dias. Voce podera enviar um novo desafio em " + diaTexto + ".");
+        }
     }
     
     @Transactional

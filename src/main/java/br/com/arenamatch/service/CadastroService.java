@@ -41,6 +41,7 @@ public class CadastroService {
     @Autowired private PartidaRepository partidaRepo;
     @Autowired private EmailService emailService;
     @Autowired private CpfValidator cpfValidator;
+    @Autowired private ParametroSistemaService parametroSistemaService;
 
     @Value("${arenamatch.validation.email-activation-enabled:true}")
     private boolean emailActivationEnabled;
@@ -84,7 +85,7 @@ public class CadastroService {
 	        user.setPlanoAssinatura(PlanoAssinatura.TRIAL);
 	        user.setStatusPagamento(StatusPagamento.TRIAL);
 	        user.setDataInicioAssinatura(LocalDateTime.now());
-	        user.setDataExpiracao(LocalDateTime.now().plusDays(60));
+	        user.setDataExpiracao(LocalDateTime.now().plusDays(parametroSistemaService.buscarDiasTrial()));
 	        user.setDataAceiteTermos(LocalDateTime.now());
             if (emailActivationEnabled) {
                 user.setStatusUsuario(StatusUsuario.PENDENTE_ATIVACAO);

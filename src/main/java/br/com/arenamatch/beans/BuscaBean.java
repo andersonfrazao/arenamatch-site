@@ -143,9 +143,11 @@ public class BuscaBean implements Serializable {
             
             cancelarDesafio();
             
+        } catch (RestClientResponseException e) {
+            msgErro("Nao foi possivel enviar o desafio: " + e.getResponseBodyAsString());
         } catch (Exception e) {
             e.printStackTrace();
-            msgErro("Não foi possível enviar o desafio: " + e.getMessage());
+            msgErro("Nao foi possivel enviar o desafio: " + e.getMessage());
         }
     }
 
