@@ -85,7 +85,7 @@ public class NotificacaoBean implements Serializable {
 
         // Calcula quantos convites são de jogo (desafios pendentes ou placares aguardando)
         this.totalConvitesJogo = (int) listaNotificacoes.stream()
-            .filter(n -> "JOGO".equals(n.getTipo()) || "PLACAR".equals(n.getTipo()))
+            .filter(n -> "JOGO".equals(n.getTipo()) || "PLACAR".equals(n.getTipo()) || "PLACAR_PENDENTE".equals(n.getTipo()))
             .count();
             
         // Calcula quantos convites são de liga

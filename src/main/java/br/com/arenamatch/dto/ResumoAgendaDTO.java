@@ -13,4 +13,6 @@ public class ResumoAgendaDTO {
     private boolean temJogoConfirmado; // Status AGENDADO
     private boolean temDesafioPendente; // Status PENDENTE (Recebido)
     private boolean temCancelado;
+    private boolean temJogoRealizado;
+    private boolean temPlacarPendente;
 }

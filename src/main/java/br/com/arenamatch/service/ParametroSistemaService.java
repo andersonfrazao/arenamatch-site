@@ -10,6 +10,7 @@ public class ParametroSistemaService {
     public static final String MIN_DIAS_ANTECEDENCIA_AGENDAMENTO = "MIN_DIAS_ANTECEDENCIA_AGENDAMENTO";
     public static final String DIAS_INTERVALO_AGENDAMENTO_PLANO_BASICO = "DIAS_INTERVALO_AGENDAMENTO_PLANO_BASICO";
     public static final String DIAS_TRIAL = "DIAS_TRIAL";
+    public static final String DIAS_CONFIRMACAO_AUTOMATICA_PLACAR = "DIAS_CONFIRMACAO_AUTOMATICA_PLACAR";
 
     private final ParametroSistemaRepository parametroSistemaRepository;
 
@@ -33,6 +34,10 @@ public class ParametroSistemaService {
 
     public int buscarDiasTrial() {
         return buscarInteiro(DIAS_TRIAL, 90);
+    }
+
+    public int buscarDiasConfirmacaoAutomaticaPlacar() {
+        return buscarInteiro(DIAS_CONFIRMACAO_AUTOMATICA_PLACAR, 3);
     }
 
     public void validarDataMinimaAgendamento(LocalDate dataJogo) {

@@ -28,6 +28,7 @@ public class BuscaService {
     @Autowired private UsuarioRepository usuarioRepo; 
     @Autowired private DistanciaService distanciaService;
     @Autowired private ParametroSistemaService parametroSistemaService;
+    @Autowired private PlacarPendenteService placarPendenteService;
 
     public List<TimeResumoDTO> buscar(FiltroBuscaDTO filtro) {
         return new ArrayList<>(); 
@@ -40,6 +41,8 @@ public class BuscaService {
     }
     
     public List<TimeResumoDTO> buscarTimesDisponiveis(LocalDate data, Double raio, String cidade, String nome, Long idMeuTime, Categoria categoria) {
+        placarPendenteService.validarSemPlacarPendente(idMeuTime);
+
         if (data.isBefore(LocalDate.now())) {
             throw new RuntimeException("A data da busca não pode ser inferior à data atual.");
         }

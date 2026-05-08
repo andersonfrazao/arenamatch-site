@@ -65,5 +65,8 @@ public class Partida {
     private StatusPlacar statusPlacar = StatusPlacar.PENDENTE;
 
     private Long idTimeQueInformou;
+
+    @Column(name = "data_informacao_placar")
+    private LocalDateTime dataInformacaoPlacar;
     
 }

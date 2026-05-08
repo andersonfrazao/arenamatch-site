@@ -32,13 +32,18 @@ public class NotificacaoService {
     @Autowired
     private NotificacaoRepository notificacaoRepository;
 
+    @Autowired
+    private PlacarPendenteService placarPendenteService;
+
     // INJEÇÃO DO WEBSOCKET (O "Carteiro" do Spring)
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<NotificacaoDTO> buscarNotificacoes(Long idTime) {
         List<NotificacaoDTO> listaConsolidada = new ArrayList<>();
+
+        placarPendenteService.buscarPendencias(idTime);
 
         // 1. Busca os convites virtuais de LIGA
         listaConsolidada.addAll(buscarConvitesLigaVirtuais(idTime));
@@ -48,6 +53,9 @@ public class NotificacaoService {
 
         // 3. NOVA FONTE: Busca os alertas reais (PLACAR) da nova tabela
         listaConsolidada.addAll(buscarNotificacoesFisicas(idTime));
+
+        // 4. Alertas virtuais de jogos realizados sem placar informado
+        listaConsolidada.addAll(buscarPlacaresPendentesVirtuais(idTime));
 
         // Ordena a lista consolidada para mostrar os mais recentes primeiro (Ordem Decrescente)
         listaConsolidada.sort((n1, n2) -> {
@@ -134,6 +142,28 @@ public class NotificacaoService {
             dto.setEnviadoPorMim(false); // Alertas do sistema não são "enviados por mim"
             lista.add(dto);
         }
+        return lista;
+    }
+
+    private List<NotificacaoDTO> buscarPlacaresPendentesVirtuais(Long idTime) {
+        List<NotificacaoDTO> lista = new ArrayList<>();
+
+        List<Partida> partidas = partidaRepository.buscarJogosRealizadosComPlacarPendente(idTime);
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        for (Partida p : partidas) {
+            NotificacaoDTO dto = new NotificacaoDTO();
+            dto.setIdReferencia(p.getId());
+            dto.setTipo("PLACAR_PENDENTE");
+            dto.setTitulo("Placar pendente");
+            dto.setSubtitulo("Acesse a agenda e informe o placar do jogo do dia "
+                    + (p.getDataHora() != null ? p.getDataHora().format(formatador) : "anterior")
+                    + " para manter o ranking atualizado.");
+            dto.setDataCriacao(p.getDataHora());
+            dto.setEnviadoPorMim(false);
+            lista.add(dto);
+        }
+
         return lista;
     }
 

@@ -87,6 +87,35 @@ public interface PartidaRepository extends JpaRepository<Partida, Long> {
             ORDER BY p.dataHora DESC
         """)
     List<Partida> buscarPartidasFuturasAtivasPorTime(@Param("timeId") Long timeId);
+
+    @Query("""
+            SELECT p FROM Partida p
+            WHERE (p.mandante.id = :timeId OR p.visitante.id = :timeId)
+            AND p.status = 'AGENDADO'
+            AND p.statusPlacar = 'PENDENTE'
+            AND p.dataHora < CURRENT_TIMESTAMP
+            ORDER BY p.dataHora ASC
+        """)
+    List<Partida> buscarJogosRealizadosComPlacarPendente(@Param("timeId") Long timeId);
+
+    @Query("""
+            SELECT p FROM Partida p
+            WHERE (p.mandante.id = :timeId OR p.visitante.id = :timeId)
+            AND p.status = 'AGENDADO'
+            AND p.statusPlacar = 'AGUARDANDO_CONFIRMACAO'
+            AND p.idTimeQueInformou <> :timeId
+            ORDER BY p.dataInformacaoPlacar ASC
+        """)
+    List<Partida> buscarPlacaresAguardandoAcaoDoTime(@Param("timeId") Long timeId);
+
+    @Query("""
+            SELECT p FROM Partida p
+            WHERE p.status = 'AGENDADO'
+            AND p.statusPlacar = 'AGUARDANDO_CONFIRMACAO'
+            AND p.dataInformacaoPlacar <= :limite
+            ORDER BY p.dataInformacaoPlacar ASC
+        """)
+    List<Partida> buscarPlacaresComConfirmacaoAutomaticaExpirada(@Param("limite") LocalDateTime limite);
     
     @Query("""
             SELECT p.id FROM Partida p 

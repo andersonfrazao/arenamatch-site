@@ -104,6 +104,9 @@ public class BuscaBean implements Serializable {
                 msgInfo("Nenhum time encontrado para esta data na sua região.");
             }
             
+        } catch (RestClientResponseException e) {
+            this.resultados = new ArrayList<>();
+            msgErro(e.getResponseBodyAsString());
         } catch (Exception e) {
             e.printStackTrace();
             msgErro("Erro ao buscar os times");

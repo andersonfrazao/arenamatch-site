@@ -34,6 +34,9 @@ public class LigaService {
     
     @Autowired
     private SimpMessagingTemplate mensageiro;
+
+    @Autowired
+    private PlacarPendenteService placarPendenteService;
     // --- 1. CRIAR UMA NOVA LIGA ---
  // O retorno agora é 100% DTO
     @Transactional
@@ -41,6 +44,8 @@ public class LigaService {
         
         Time admin = timeRepository.findById(idTimeAdmin)
                 .orElseThrow(() -> new RuntimeException("Time administrador não encontrado."));
+
+        placarPendenteService.validarSemPlacarPendente(admin.getId());
 
         Liga liga = new Liga();
         liga.setNome(nome);
@@ -82,6 +87,8 @@ public class LigaService {
                 .orElseThrow(() -> new RuntimeException("Time convidado não encontrado."));
 
         // Regra 1: O time já está na liga?
+        placarPendenteService.validarSemPlacarPendente(liga.getAdmin().getId());
+
         if (liga.getTimes().contains(convidado)) {
             throw new RuntimeException("Este time já faz parte da liga.");
         }
@@ -125,6 +132,8 @@ public class LigaService {
             // Adiciona o time na liga
             Liga liga = convite.getLiga();
             Time time = convite.getTimeConvidado();
+
+            placarPendenteService.validarSemPlacarPendente(time.getId());
             
             if (!liga.getTimes().contains(time)) {
                 liga.getTimes().add(time);
@@ -261,6 +270,8 @@ public class LigaService {
     @Transactional
     public void solicitarEntradaNaLiga(Long idLiga, Long meuTimeId) {
         Liga liga = ligaRepository.findById(idLiga).orElseThrow();
+        placarPendenteService.validarSemPlacarPendente(meuTimeId);
+
         Time meuTime = new Time(); // Ou busque no TimeRepository
         meuTime.setId(meuTimeId);
 

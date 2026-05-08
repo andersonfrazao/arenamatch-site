@@ -375,6 +375,12 @@
                                             </div>
                                         </h:panelGroup>
 
+                                        <h:panelGroup rendered="#{notif.tipo eq 'PLACAR_PENDENTE'}">
+                                            <div class="text-white" style="font-weight:900;">
+                                                <i class="fas fa-clipboard-list text-red-400" style="margin-right:.4rem;"></i> #{notif.titulo}
+                                            </div>
+                                        </h:panelGroup>
+
                                         <div style="color: rgba(255,255,255,0.65); font-size: 0.9rem;">#{notif.subtitulo}</div>
 
                                         <h:panelGroup rendered="#{notif.tipo eq 'JOGO' and notif.valorTaxa ne null and notif.valorTaxa gt 0}" layout="block" styleClass="mt-2">
@@ -432,6 +438,11 @@
                                             <p:commandButton value="Contestar" action="#{notificacaoBean.contestarResultadoPlacar(notif)}" 
                                                              update="painelNotificacoesGlobais globalForm:msgs" 
                                                              icon="fas fa-times" styleClass="ui-button-danger rounded-btn ui-button-sm shadow-2" title="Rejeitar" />
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'PLACAR_PENDENTE'}">
+                                            <p:button value="Ir para agenda" outcome="/minha-agenda.xhtml" icon="far fa-calendar-alt"
+                                                      styleClass="ui-button-warning rounded-btn ui-button-sm shadow-2" />
                                         </h:panelGroup>
 
                                     </div>

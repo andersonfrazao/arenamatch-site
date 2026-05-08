@@ -17,6 +17,7 @@ import br.com.arenamatch.dto.ResumoAgendaDTO;
 import br.com.arenamatch.entity.Partida;
 import br.com.arenamatch.entity.Time;
 import br.com.arenamatch.enums.StatusPartida;
+import br.com.arenamatch.enums.StatusPlacar;
 import br.com.arenamatch.repository.PartidaRepository;
 
 @Service
@@ -54,13 +55,27 @@ public class AgendaService {
                 List<Partida> doDia = mapaPartidas.get(dataAtual);
                 
                 // Bolinhas do Calendário
-                boolean temConfirmado = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.AGENDADO);
+                boolean temConfirmado = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.AGENDADO
+                        && p.getDataHora() != null
+                        && p.getDataHora().isAfter(LocalDateTime.now()));
                 boolean temPendente = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.PENDENTE);
                 boolean temCancelado = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.CANCELADO);
+                boolean temPlacarPendente = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.AGENDADO
+                        && p.getDataHora() != null
+                        && p.getDataHora().isBefore(LocalDateTime.now())
+                        && (p.getStatusPlacar() == null
+                            || p.getStatusPlacar() == StatusPlacar.PENDENTE
+                            || p.getStatusPlacar() == StatusPlacar.AGUARDANDO_CONFIRMACAO));
+                boolean temJogoRealizado = !temPlacarPendente && doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.AGENDADO
+                        && p.getDataHora() != null
+                        && p.getDataHora().isBefore(LocalDateTime.now())
+                        && p.getStatusPlacar() == StatusPlacar.CONFIRMADO);
 
                 diaDto.setTemJogoConfirmado(temConfirmado);
                 diaDto.setTemDesafioPendente(temPendente);
                 diaDto.setTemCancelado(temCancelado); // Define a bolinha vermelha
+                diaDto.setTemJogoRealizado(temJogoRealizado);
+                diaDto.setTemPlacarPendente(temPlacarPendente);
             }
 
             calendario.add(diaDto);

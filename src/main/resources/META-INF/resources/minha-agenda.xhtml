@@ -44,6 +44,8 @@
             .day-card.hasGame { border-color: rgba(37,211,102,0.30); background: rgba(37,211,102,0.06); }
             .day-card.hasInvite { border-color: rgba(255,204,0,0.35); background: rgba(255,204,0,0.05); }
             .day-card.hasCancelled { border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1); }
+            .day-card.hasPlayed { border-color: rgba(59,130,246,0.38); background: rgba(59,130,246,0.08); }
+            .day-card.hasScorePending { border-color: rgba(248,113,113,0.55); background: rgba(248,113,113,0.12); box-shadow: 0 0 12px rgba(248,113,113,0.16); }
             
             .dow { color: rgba(255,255,255,0.72); font-size:.85rem; }
             .dnum { font-weight: 900; font-size: 1.2rem; margin-top: 5px; }
@@ -53,6 +55,8 @@
             .dot.game { background: #25d366; border-color: rgba(37,211,102,0.35); box-shadow: 0 0 5px #25d366; }
             .dot.invite { background: #ffcc00; border-color: rgba(255,204,0,0.45); box-shadow: 0 0 5px #ffcc00; }
             .dot.cancelled { background: #ef4444; border-color: rgba(239, 68, 68, 0.5); box-shadow: 0 0 5px #ef4444; }            
+            .dot.played { background: #3b82f6; border-color: rgba(59,130,246,0.45); box-shadow: 0 0 5px #3b82f6; }
+            .dot.score-pending { background: #f87171; border-color: rgba(248,113,113,0.55); box-shadow: 0 0 6px #f87171; }
 
             .event-tags { display: flex; flex-direction: column; gap: .25rem; margin-top: .55rem; min-height: 22px; }
             .event-tag {
@@ -64,6 +68,8 @@
             .event-tag.invite { color: #fde68a; background: rgba(255,204,0,0.10); border-color: rgba(255,204,0,0.30); }
             .event-tag.liga { color: #d8b4fe; background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.30); }
             .event-tag.cancelled { color: #fecaca; background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.32); }
+            .event-tag.played { color: #bfdbfe; background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.32); }
+            .event-tag.score-pending { color: #fecaca; background: rgba(248,113,113,0.14); border-color: rgba(248,113,113,0.38); }
 
             .role-badge {
                 display: inline-flex; align-items: center; gap: .35rem; padding: .28rem .55rem; border-radius: 999px;
@@ -93,6 +99,12 @@
                 border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04);
                 align-items:flex-start; margin-bottom: 0.5rem;
             }
+            .item-lista.game-upcoming { border-color: rgba(37,211,102,0.26); background: rgba(37,211,102,0.05); }
+            .item-lista.game-played { border-color: rgba(59,130,246,0.30); background: rgba(59,130,246,0.06); }
+            .item-lista.score-pending { border-color: rgba(248,113,113,0.45); background: rgba(248,113,113,0.09); }
+            .item-lista.score-waiting { border-color: rgba(234,179,8,0.38); background: rgba(234,179,8,0.08); }
+            .item-lista.score-confirmed { border-color: rgba(45,212,191,0.34); background: rgba(45,212,191,0.07); }
+            .item-lista.score-dispute { border-color: rgba(239,68,68,0.44); background: rgba(239,68,68,0.10); }
             .badge-icon {
                 width:46px; height:46px; border-radius: 16px; display:grid; place-items:center;
                 border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); flex-shrink: 0;
@@ -106,12 +118,20 @@
                     gap: .75rem;
                 }
                 .legend {
-                    justify-content: flex-start;
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    justify-content: stretch;
                     gap: .4rem;
                 }
                 .pill {
-                    font-size: .76rem;
-                    padding: .28rem .48rem;
+                    min-width: 0;
+                    width: 100%;
+                    font-size: .68rem;
+                    padding: .28rem .42rem;
+                    gap: .32rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
                 .gridWeek {
                     display: grid !important;
@@ -120,21 +140,52 @@
                     width: 100%;
                 }
                 .day-card {
-                    min-height: 104px;
+                    min-height: 118px;
                     padding: .55rem;
                     border-radius: 12px;
                 }
                 .dow { font-size: .74rem; }
                 .dnum { font-size: 1.12rem; }
+                .dots {
+                    flex-wrap: wrap;
+                    gap: .25rem;
+                }
+                .dot {
+                    width: 8px;
+                    height: 8px;
+                }
+                .event-tags {
+                    gap: .18rem;
+                    margin-top: .4rem;
+                }
                 .event-tag {
                     max-width: 100%;
-                    font-size: .62rem;
-                    padding: .15rem .32rem;
+                    font-size: .56rem;
+                    padding: .13rem .28rem;
+                    gap: .22rem;
+                }
+                .item-lista {
+                    gap: .6rem;
+                    padding: .7rem;
+                    border-radius: 14px;
+                }
+                .badge-icon {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 12px;
+                }
+                .role-badge {
+                    max-width: 100%;
+                    font-size: .66rem;
+                    padding: .22rem .42rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
             }
 
             @media (max-width: 340px) {
                 .gridWeek { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                .legend { grid-template-columns: 1fr; }
             }
         </style>
 
@@ -177,6 +228,8 @@
 
                         <div class="legend">
                             <span class="pill"><span class="dot game"></span> Confirmado</span>
+                            <span class="pill"><span class="dot played"></span> Realizado</span>
+                            <span class="pill"><span class="dot score-pending"></span> Placar pendente</span>
                             <span class="pill"><span class="dot invite"></span> Amistoso Pendente</span>
                             <!-- Legenda de liga pendente comentada temporariamente para retomada futura.
                             <span class="pill" style="border-color: #a855f7;"><span class="dot liga"></span> Liga Pendente</span>
@@ -194,7 +247,9 @@
                                 
                                 <h:panelGroup layout="block" 
                                               styleClass="day-card #{minhaAgendaBean.diaSelecionado eq dia ? 'selected' : ''} 
-                                                          #{dia.temJogoConfirmado ? 'hasGame' : ''} 
+                                                          #{dia.temJogoConfirmado and not dia.temJogoRealizado and not dia.temPlacarPendente ? 'hasGame' : ''} 
+                                                          #{dia.temJogoRealizado ? 'hasPlayed' : ''}
+                                                          #{dia.temPlacarPendente ? 'hasScorePending' : ''}
                                                           #{dia.temDesafioPendente ? 'hasInvite' : ''} 
                                                           #{dia.temCancelado ? 'hasCancelled' : ''}
                                                           #{minhaAgendaBean.temConviteLigaPendenteNoDia(dia.data) ? 'borda-liga-pendente' : ''}
@@ -204,14 +259,22 @@
                                     <div class="dnum">#{dia.diaMes}</div>
                                     
                                     <div class="dots">
-                                        <h:panelGroup rendered="#{dia.temJogoConfirmado}" styleClass="dot game"/>
+                                        <h:panelGroup rendered="#{dia.temPlacarPendente}" styleClass="dot score-pending"/>
+                                        <h:panelGroup rendered="#{dia.temJogoRealizado and not dia.temPlacarPendente}" styleClass="dot played"/>
+                                        <h:panelGroup rendered="#{dia.temJogoConfirmado and not dia.temJogoRealizado and not dia.temPlacarPendente}" styleClass="dot game"/>
                                         <h:panelGroup rendered="#{dia.temDesafioPendente}" styleClass="dot invite"/>
                                         <h:panelGroup rendered="#{minhaAgendaBean.temConviteLigaPendenteNoDia(dia.data)}" styleClass="dot liga"/>
                                         <h:panelGroup rendered="#{dia.temCancelado or minhaAgendaBean.temConviteLigaRecusadoNoDia(dia.data)}" styleClass="dot cancelled"/>
                                     </div>
 
                                     <div class="event-tags">
-                                        <h:panelGroup rendered="#{dia.temJogoConfirmado}" layout="block" styleClass="event-tag game">
+                                        <h:panelGroup rendered="#{dia.temPlacarPendente}" layout="block" styleClass="event-tag score-pending">
+                                            <i class="fas fa-clipboard-list"></i> Placar
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{dia.temJogoRealizado and not dia.temPlacarPendente}" layout="block" styleClass="event-tag played">
+                                            <i class="fas fa-flag-checkered"></i> Realizado
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{dia.temJogoConfirmado and not dia.temJogoRealizado and not dia.temPlacarPendente}" layout="block" styleClass="event-tag game">
                                             <i class="fas fa-check-circle"></i> Jogo
                                         </h:panelGroup>
                                         <h:panelGroup rendered="#{dia.temDesafioPendente}" layout="block" styleClass="event-tag invite">
@@ -250,9 +313,18 @@
                     </h:panelGroup>
 
                     <ui:repeat value="#{minhaAgendaBean.eventosDoDia}" var="evento">
-                        <div class="item-lista">
+                        <div class="item-lista
+                                    #{evento.tipo eq 'GAME' and not evento.passouDaHora ? 'game-upcoming' : ''}
+                                    #{evento.tipo eq 'GAME' and evento.passouDaHora ? 'game-played' : ''}
+                                    #{evento.tipo eq 'GAME' and evento.passouDaHora and (evento.statusPlacar eq 'PENDENTE' or empty evento.statusPlacar) ? 'score-pending' : ''}
+                                    #{evento.tipo eq 'GAME' and evento.statusPlacar eq 'AGUARDANDO_CONFIRMACAO' ? 'score-waiting' : ''}
+                                    #{evento.tipo eq 'GAME' and evento.statusPlacar eq 'CONFIRMADO' ? 'score-confirmed' : ''}
+                                    #{evento.tipo eq 'GAME' and evento.statusPlacar eq 'EM_DISPUTA' ? 'score-dispute' : ''}">
                             <div class="badge-icon">
-                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar ne 'CONFIRMADO'}"><i class="fas fa-check text-xl" style="color: #25d366;"></i></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and not evento.passouDaHora}"><i class="fas fa-check text-xl" style="color: #25d366;"></i></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.passouDaHora and (evento.statusPlacar eq 'PENDENTE' or empty evento.statusPlacar)}"><i class="fas fa-clipboard-list text-xl" style="color: #f87171;"></i></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar eq 'AGUARDANDO_CONFIRMACAO'}"><i class="far fa-clock text-xl" style="color: #facc15;"></i></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar eq 'EM_DISPUTA'}"><i class="fas fa-exclamation-triangle text-xl" style="color: #ef4444;"></i></h:panelGroup>
                                 <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar eq 'CONFIRMADO'}"><i class="fas fa-trophy text-xl" style="color: #2dd4bf;"></i></h:panelGroup>
                                 
                                 <h:panelGroup rendered="#{evento.tipo eq 'INVITE_RECEIVED'}"><i class="fas fa-envelope-open-text text-xl" style="color: #ffcc00;"></i></h:panelGroup>
@@ -264,7 +336,10 @@
 
                             <div style="flex-grow: 1; padding-right: 5px;">
                                 
-                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar ne 'CONFIRMADO'}"><div class="text-green-400 font-bold text-sm mb-2 uppercase tracking-wide"><i class="fas fa-check-circle mr-1"></i> Jogo Marcado</div></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and not evento.passouDaHora}"><div class="text-green-400 font-bold text-sm mb-2 uppercase tracking-wide"><i class="fas fa-check-circle mr-1"></i> Jogo Marcado</div></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.passouDaHora and (evento.statusPlacar eq 'PENDENTE' or empty evento.statusPlacar)}"><div class="text-red-300 font-bold text-sm mb-2 uppercase tracking-wide"><i class="fas fa-clipboard-list mr-1"></i> Placar Pendente</div></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar eq 'AGUARDANDO_CONFIRMACAO'}"><div class="text-yellow-400 font-bold text-sm mb-2 uppercase tracking-wide"><i class="far fa-clock mr-1"></i> Aguardando Placar</div></h:panelGroup>
+                                <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar eq 'EM_DISPUTA'}"><div class="text-red-400 font-bold text-sm mb-2 uppercase tracking-wide"><i class="fas fa-exclamation-triangle mr-1"></i> Placar em Disputa</div></h:panelGroup>
                                 <h:panelGroup rendered="#{evento.tipo eq 'GAME' and evento.statusPlacar eq 'CONFIRMADO'}"><div class="text-teal-400 font-bold text-sm mb-2 uppercase tracking-wide"><i class="fas fa-flag-checkered mr-1"></i> Jogo Realizado</div></h:panelGroup>
                                 
                                 <h:panelGroup rendered="#{evento.tipo eq 'INVITE_RECEIVED'}"><div class="text-yellow-400 font-bold text-sm mb-2 uppercase tracking-wide"><i class="fas fa-exclamation-circle mr-1"></i> Convite Recebido</div></h:panelGroup>

@@ -33,6 +33,7 @@ public class PartidaService {
     @Autowired private NotificacaoService notificacaoService;
     @Autowired private AssinaturaService assinaturaService;
     @Autowired private ParametroSistemaService parametroSistemaService;
+    @Autowired private PlacarPendenteService placarPendenteService;
     
     public List<PartidaDTO> listarProximosJogos(Long idTime) {
         Time time = timeRepository.findById(idTime)
@@ -148,6 +149,7 @@ public class PartidaService {
         Time desafiante = timeRepository.findById(dto.getIdTimeDesafiante()).orElseThrow();
         Time desafiado = timeRepository.findById(dto.getIdTimeDesafiado()).orElseThrow();
 
+        placarPendenteService.validarSemPlacarPendente(desafiante.getId());
         validarPermissaoParaCriarDesafio(desafiante);
 
         // ==========================================
@@ -274,6 +276,9 @@ public class PartidaService {
     public void aceitarDesafio(Long idPartida) {
         Partida p = partidaRepository.findById(idPartida).orElseThrow();
 
+        placarPendenteService.validarSemPlacarPendente(p.getMandante().getId());
+        placarPendenteService.validarSemPlacarPendente(p.getVisitante().getId());
+
         boolean mandanteOcupado = partidaRepository.existsByTimeIdAndDataAndStatusAgendado(p.getMandante().getId(), p.getDataHora().toLocalDate());
         boolean visitanteOcupado = partidaRepository.existsByTimeIdAndDataAndStatusAgendado(p.getVisitante().getId(), p.getDataHora().toLocalDate());
 
@@ -303,8 +308,7 @@ public class PartidaService {
 
         partida.setGolsMandante(golsM);
         partida.setGolsVisitante(golsV);
-        partida.setIdTimeQueInformou(idTimeInformante);
-        partida.setStatusPlacar(StatusPlacar.AGUARDANDO_CONFIRMACAO);
+        placarPendenteService.registrarInformacaoPlacar(partida, idTimeInformante);
         
         partidaRepository.save(partida);
 
@@ -338,11 +342,7 @@ public class PartidaService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status inválido para confirmação");
         }
 
-        atualizarEstatisticasTime(partida.getMandante(), partida.getGolsMandante(), partida.getGolsVisitante());
-        atualizarEstatisticasTime(partida.getVisitante(), partida.getGolsVisitante(), partida.getGolsMandante());
-
-        partida.setStatusPlacar(StatusPlacar.CONFIRMADO);
-        partidaRepository.save(partida);
+        placarPendenteService.confirmarPlacar(partida);
         
         // 🚨 LIMPA O SININHO DE PLACAR AQUI
         notificacaoService.deletarNotificacaoPlacar(idPartida);
