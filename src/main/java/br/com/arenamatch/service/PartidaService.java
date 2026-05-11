@@ -19,12 +19,14 @@ import br.com.arenamatch.dto.DesafioDTO;
 import br.com.arenamatch.dto.PartidaDTO;
 import br.com.arenamatch.dto.TimeResumoDTO;
 import br.com.arenamatch.entity.Agenda;
+import br.com.arenamatch.entity.MensagemChat;
 import br.com.arenamatch.entity.Partida;
 import br.com.arenamatch.entity.Time;
 import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.enums.StatusPartida;
 import br.com.arenamatch.enums.StatusPlacar;
 import br.com.arenamatch.repository.AgendaRepository;
+import br.com.arenamatch.repository.MensagemChatRepository;
 import br.com.arenamatch.repository.PartidaRepository;
 import br.com.arenamatch.repository.TimeRepository;
 
@@ -38,6 +40,7 @@ public class PartidaService {
     @Autowired private ParametroSistemaService parametroSistemaService;
     @Autowired private PlacarPendenteService placarPendenteService;
     @Autowired private AgendaRepository agendaRepository;
+    @Autowired private MensagemChatRepository mensagemChatRepository;
     
     public List<PartidaDTO> listarProximosJogos(Long idTime) {
         Time time = timeRepository.findById(idTime)
@@ -190,7 +193,23 @@ public class PartidaService {
         partida.setDesafiante(desafiante);
         partida.setMensagem(dto.getMensagem());
         
-        partidaRepository.save(partida);
+        partida = partidaRepository.save(partida);
+        criarMensagemInicialDoDesafio(partida, desafiante, dto.getMensagem());
+    }
+
+    private void criarMensagemInicialDoDesafio(Partida partida, Time desafiante, String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            return;
+        }
+
+        MensagemChat mensagem = new MensagemChat();
+        mensagem.setPartida(partida);
+        mensagem.setRemetente(desafiante);
+        mensagem.setTexto(texto.trim());
+        mensagem.setDataHora(partida.getDataSolicitacao() != null ? partida.getDataSolicitacao() : LocalDateTime.now());
+        mensagem.setLida(false);
+
+        mensagemChatRepository.save(mensagem);
     }
 
     private PartidaDTO converterParaDTO(Partida p) {
