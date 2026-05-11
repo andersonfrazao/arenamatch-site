@@ -242,6 +242,9 @@
                             <div style="color: #38bdf8; font-size: 0.75rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 #{dashboardBean.time.nome}
                             </div>
+                            <div style="color: #cbd5e1; font-size: 0.68rem; font-weight: 800; text-transform: uppercase;">
+                                #{dashboardBean.time.mandoCampo ? 'Mandante' : 'Visitante'}
+                            </div>
                         </div>
                     </div>
                     <div class="am-plan-card">
@@ -297,6 +300,7 @@
                             <div class="am-mobile-team-text">
                                 <div class="font-bold text-white text-sm">#{sessaoBean.usuarioLogado.nome}</div>
                                 <div class="font-bold text-xs" style="color: #38bdf8;">#{dashboardBean.time.nome}</div>
+                                <div class="font-bold text-xs uppercase" style="color: #cbd5e1;">#{dashboardBean.time.mandoCampo ? 'Mandante' : 'Visitante'}</div>
                                 <div class="am-mobile-plan">
                                     <span class="am-plan-badge #{sessaoBean.planoCssClass}">
                                         <i class="fas fa-crown"></i> #{sessaoBean.planoAssinaturaLabel}

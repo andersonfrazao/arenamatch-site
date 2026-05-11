@@ -3,6 +3,7 @@ package br.com.arenamatch.service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -17,11 +18,13 @@ import org.springframework.web.server.ResponseStatusException;
 import br.com.arenamatch.dto.DesafioDTO;
 import br.com.arenamatch.dto.PartidaDTO;
 import br.com.arenamatch.dto.TimeResumoDTO;
+import br.com.arenamatch.entity.Agenda;
 import br.com.arenamatch.entity.Partida;
 import br.com.arenamatch.entity.Time;
 import br.com.arenamatch.enums.PlanoAssinatura;
 import br.com.arenamatch.enums.StatusPartida;
 import br.com.arenamatch.enums.StatusPlacar;
+import br.com.arenamatch.repository.AgendaRepository;
 import br.com.arenamatch.repository.PartidaRepository;
 import br.com.arenamatch.repository.TimeRepository;
 
@@ -34,6 +37,7 @@ public class PartidaService {
     @Autowired private AssinaturaService assinaturaService;
     @Autowired private ParametroSistemaService parametroSistemaService;
     @Autowired private PlacarPendenteService placarPendenteService;
+    @Autowired private AgendaRepository agendaRepository;
     
     public List<PartidaDTO> listarProximosJogos(Long idTime) {
         Time time = timeRepository.findById(idTime)
@@ -180,7 +184,7 @@ public class PartidaService {
         partida.setMandante(mandante);
         partida.setVisitante(visitante);
         partida.setStatus(StatusPartida.PENDENTE);
-        partida.setDataHora(dto.getDataHoraPartida()); 
+        partida.setDataHora(definirDataHoraPeloMandante(mandante, diaBanco, dto)); 
         partida.setDataSolicitacao(LocalDateTime.now()); 
         
         partida.setDesafiante(desafiante);
@@ -231,6 +235,24 @@ public class PartidaService {
         }
 
         return desafiado;
+    }
+
+    private LocalDateTime definirDataHoraPeloMandante(Time mandante, String diaBanco, DesafioDTO dto) {
+        Agenda agendaMandante = null;
+        if (dto.getCategoria() != null) {
+            agendaMandante = agendaRepository
+                    .findFirstByTimeIdAndDiaSemanaAndCategoriaOrderByHoraInicioAsc(mandante.getId(), diaBanco, dto.getCategoria())
+                    .orElse(null);
+        }
+
+        if (agendaMandante == null) {
+            agendaMandante = agendaRepository
+                    .findFirstByTimeIdAndDiaSemanaOrderByHoraInicioAsc(mandante.getId(), diaBanco)
+                    .orElseThrow(() -> new RuntimeException("O time mandante nÃ£o possui horÃ¡rio cadastrado para " + diaBanco + "."));
+        }
+
+        LocalTime horaInicio = LocalTime.parse(agendaMandante.getHoraInicio());
+        return dto.getDataHoraPartida().toLocalDate().atTime(horaInicio);
     }
 
     private void validarPermissaoParaCriarDesafio(Time desafiante) {

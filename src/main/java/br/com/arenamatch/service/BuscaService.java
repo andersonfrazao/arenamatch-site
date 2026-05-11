@@ -104,6 +104,8 @@ public class BuscaService {
                 );
 
                 // --- 🚨 FORMATANDO O HORÁRIO PARA A TELA ---
+                String horarioAgenda = formatarHorarioMandante(meuTime, diaSemanaBanco, categoriaEnum, t);
+                /*
                 Object horaInicioObj = t.get("horaInicio");
                 Object horaFimObj = t.get("horaFim");
                 String horarioAgenda = diaSemanaBanco; // Default
@@ -114,6 +116,7 @@ public class BuscaService {
                     String hFim = horaFimObj.toString().substring(0, 5);
                     horarioAgenda = diaSemanaBanco + " das " + hInicio + " às " + hFim;
                 }
+                */
                 
                 // Reaproveitamos este campo existente no DTO para mostrar o horário no Card!
                 dto.setDiasDaSemanaTexto(horarioAgenda);
@@ -170,5 +173,30 @@ public class BuscaService {
         }
 
         return raioSolicitado;
+    }
+
+    private String formatarHorarioMandante(Time meuTime, String diaSemanaBanco, Categoria categoria, Tuple adversarioAgenda) {
+        if (meuTime.isMandoCampo()) {
+            return meuTime.getAgendas().stream()
+                    .filter(a -> a.getDiaSemana().equalsIgnoreCase(diaSemanaBanco))
+                    .filter(a -> categoria == null || a.getCategoria() == categoria)
+                    .findFirst()
+                    .map(a -> formatarHorario(diaSemanaBanco, a.getHoraInicio(), a.getHoraFim()))
+                    .orElse(diaSemanaBanco);
+        }
+
+        Object horaInicioObj = adversarioAgenda.get("horaInicio");
+        Object horaFimObj = adversarioAgenda.get("horaFim");
+        return formatarHorario(diaSemanaBanco,
+                horaInicioObj != null ? horaInicioObj.toString() : null,
+                horaFimObj != null ? horaFimObj.toString() : null);
+    }
+
+    private String formatarHorario(String diaSemanaBanco, String horaInicio, String horaFim) {
+        if (horaInicio == null || horaFim == null) {
+            return diaSemanaBanco;
+        }
+
+        return diaSemanaBanco + " das " + horaInicio.substring(0, 5) + " Ã s " + horaFim.substring(0, 5);
     }
 }

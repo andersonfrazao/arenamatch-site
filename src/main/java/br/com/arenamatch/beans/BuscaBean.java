@@ -130,13 +130,14 @@ public class BuscaBean implements Serializable {
             dto.setIdTimeDesafiante(meuId);
             dto.setIdTimeDesafiado(timeSelecionadoParaDesafio.getId());
             dto.setMensagem(mensagemDesafio);
+            dto.setCategoria(timeSelecionadoParaDesafio.getCategoria());
             
             // LÓGICA DA DATA:
             // Pegamos a data do filtro (que é obrigatória) e definimos um horário padrão (ex: 14:00)
             // Ou o horário de início da disponibilidade do time (se tivermos essa info)
             // Aqui fixei 14:00 como referência, mas o texto da mensagem é o que vale.
             if (filtro.getDataJogo() != null) {
-                dto.setDataHoraPartida(filtro.getDataJogo().atTime(LocalTime.of(14, 0)));
+                dto.setDataHoraPartida(filtro.getDataJogo().atStartOfDay());
             } else {
                 msgErro("A data da pesquisa foi perdida. Pesquise novamente.");
                 return;

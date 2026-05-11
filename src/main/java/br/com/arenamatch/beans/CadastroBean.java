@@ -124,7 +124,7 @@ public class CadastroBean implements Serializable {
             return;
         }
 
-        if (tempDia == null || tempInicio == null || tempFim == null) {
+        if (isVazio(tempDia) || isVazio(tempInicio) || isVazio(tempFim)) {
             msgErro("Preencha todos os campos do horário.");
             return;
         }
@@ -146,8 +146,8 @@ public class CadastroBean implements Serializable {
                 
                 long minutos = ChronoUnit.MINUTES.between(inicio, fim);
                 
-                if (minutos > 120) { 
-                    msgErro("Times mandantes só podem ter janelas de jogos de no máximo 2 horas.");
+                if (minutos != 120) { 
+                    msgErro("Times mandantes devem cadastrar horarios com exatamente 2 horas.");
                     return;
                 }
                 
@@ -273,5 +273,9 @@ public class CadastroBean implements Serializable {
     private void msgInfo(String msg) {
         FacesContext.getCurrentInstance().addMessage(null, 
             new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", msg));
+    }
+
+    private boolean isVazio(String valor) {
+        return valor == null || valor.trim().isEmpty();
     }
 }

@@ -26,6 +26,9 @@ public class AgendaService {
     @Autowired
     private PartidaRepository partidaRepository;
 
+    @Autowired
+    private HorarioJogoService horarioJogoService;
+
     public List<ResumoAgendaDTO> montarCalendario(Long timeId, LocalDate dataInicio, int dias) {
         List<ResumoAgendaDTO> calendario = new ArrayList<>();
         LocalDate dataFim = dataInicio.plusDays(dias - 1);
@@ -98,7 +101,7 @@ public class AgendaService {
     private EventoAgendaDTO converterParaEvento(Partida p, Long meuTimeId) {
         EventoAgendaDTO dto = new EventoAgendaDTO();
         dto.setIdPartida(p.getId());
-        dto.setDataHora(p.getDataHora());
+        dto.setDataHora(horarioJogoService.resolverDataHoraMandante(p));
         dto.setMensagem(p.getMensagem()); 
 
         // Identifica adversário

@@ -37,6 +37,9 @@ public class ChatService {
     
     @Autowired
     private org.springframework.messaging.simp.SimpMessagingTemplate mensageiro;
+
+    @Autowired
+    private HorarioJogoService horarioJogoService;
     
 
     @Transactional(readOnly = true)
@@ -53,7 +56,7 @@ public class ChatService {
             dto.setTipo("JOGO");
             dto.setIdPartida(p.getId());
             dto.setStatusPartida(p.getStatus() != null ? p.getStatus().name() : null);
-            dto.setDataJogo(p.getDataHora());
+            dto.setDataJogo(horarioJogoService.resolverDataHoraMandante(p));
 
             // 🚨 NOVA REGRA DE NEGÓCIO: AS 3 CONDIÇÕES DE BLOQUEIO DE CHAT
             boolean placarConfirmado = p.getStatusPlacar() != null && "CONFIRMADO".equals(p.getStatusPlacar().name());

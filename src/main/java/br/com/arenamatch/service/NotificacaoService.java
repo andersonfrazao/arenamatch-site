@@ -35,6 +35,9 @@ public class NotificacaoService {
     @Autowired
     private PlacarPendenteService placarPendenteService;
 
+    @Autowired
+    private HorarioJogoService horarioJogoService;
+
     // INJEÇÃO DO WEBSOCKET (O "Carteiro" do Spring)
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -104,7 +107,8 @@ public class NotificacaoService {
             
             String nomeAdversario = adversario.getNome();
             String prefixo = fuiEuQueEnviei ? "Enviado para: " : "Recebido de: ";
-            String dataHoraFormatada = p.getDataHora() != null ? p.getDataHora().format(formatador) : "Data a definir";
+            LocalDateTime dataHoraJogo = horarioJogoService.resolverDataHoraMandante(p);
+            String dataHoraFormatada = dataHoraJogo != null ? dataHoraJogo.format(formatador) : "Data a definir";
             
             dto.setSubtitulo(prefixo + nomeAdversario + " — " + dataHoraFormatada);
             dto.setDataCriacao(p.getDataSolicitacao());
