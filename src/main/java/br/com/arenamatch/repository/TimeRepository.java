@@ -86,13 +86,16 @@ public interface TimeRepository extends JpaRepository<Time, Long> {
     
     @Query("""
             SELECT t FROM Time t
-            WHERE (
-                t.responsavel.planoAssinatura = br.com.arenamatch.enums.PlanoAssinatura.PRO
-                AND t.responsavel.statusPagamento = br.com.arenamatch.enums.StatusPagamento.PAGO
-            ) OR (
-                t.responsavel.planoAssinatura = br.com.arenamatch.enums.PlanoAssinatura.TRIAL
-                AND t.responsavel.statusPagamento = br.com.arenamatch.enums.StatusPagamento.TRIAL
-                AND t.responsavel.dataExpiracao > CURRENT_TIMESTAMP
+            WHERE t.partidasJogadas >= 1
+            AND (
+                (
+                    t.responsavel.planoAssinatura = br.com.arenamatch.enums.PlanoAssinatura.PRO
+                    AND t.responsavel.statusPagamento = br.com.arenamatch.enums.StatusPagamento.PAGO
+                ) OR (
+                    t.responsavel.planoAssinatura = br.com.arenamatch.enums.PlanoAssinatura.TRIAL
+                    AND t.responsavel.statusPagamento = br.com.arenamatch.enums.StatusPagamento.TRIAL
+                    AND t.responsavel.dataExpiracao > CURRENT_TIMESTAMP
+                )
             )
             ORDER BY t.vitorias DESC, (t.golsPro - t.golsContra) DESC, t.golsPro DESC
             """)
