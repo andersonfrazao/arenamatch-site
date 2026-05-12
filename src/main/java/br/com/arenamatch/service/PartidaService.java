@@ -71,18 +71,36 @@ public class PartidaService {
             throw new RuntimeException("Você não participa deste jogo.");
         }
 
+        if (partida.getStatus() != StatusPartida.AGENDADO) {
+            throw new RuntimeException("Somente jogos agendados podem ter cancelamento solicitado.");
+        }
+
+        if (motivo == null || motivo.trim().isEmpty()) {
+            throw new RuntimeException("Informe o motivo do cancelamento.");
+        }
+
+        if (motivo.trim().length() > 350) {
+            throw new RuntimeException("O motivo do cancelamento deve ter no maximo 350 caracteres.");
+        }
+
+        int minDiasAntecedencia = parametroSistemaService.buscarMinDiasAntecedenciaCancelamento();
         long diasAteOJogo = ChronoUnit.DAYS.between(LocalDateTime.now(), partida.getDataHora());
         
-        if (diasAteOJogo < 3) {
+        if (diasAteOJogo < minDiasAntecedencia) {
+            if (minDiasAntecedencia >= 0) {
+                throw new RuntimeException("Cancelamento nao permitido! Faltam menos de "
+                        + minDiasAntecedencia + " dias para o jogo. Combine via Chat.");
+            }
             throw new RuntimeException("Cancelamento não permitido! Faltam menos de 3 dias para o jogo. Combine via Chat.");
         }
 
         partida.setStatus(StatusPartida.SOLICITACAO_CANCELAMENTO);
         partida.setSolicitanteCancelamento(timeSolicitante);
-        partida.setMotivoCancelamento(motivo);
+        partida.setMotivoCancelamento(motivo.trim());
         partida.setDataSolicitacao(LocalDateTime.now());
         
         partidaRepository.save(partida);
+        criarMensagemCancelamento(partida, timeSolicitante, motivo.trim());
     }
 
     // --- FLUXO 2: RESPONDER SOLICITAÇÃO (ACEITAR/RECUSAR) ---
@@ -99,18 +117,28 @@ public class PartidaService {
         Partida partida = partidaRepository.findById(idPartida)
                 .orElseThrow(() -> new RuntimeException("Partida não encontrada"));
 
+        if (partida.getStatus() != StatusPartida.SOLICITACAO_CANCELAMENTO) {
+            throw new RuntimeException("Esta partida nao possui solicitacao de cancelamento pendente.");
+        }
+
+        if (!partida.getMandante().equals(timeRespondente) && !partida.getVisitante().equals(timeRespondente)) {
+            throw new RuntimeException("Voce nao participa deste jogo.");
+        }
+
+        if (partida.getSolicitanteCancelamento() == null) {
+            throw new RuntimeException("Solicitante do cancelamento nao encontrado.");
+        }
+
         if (partida.getSolicitanteCancelamento().equals(timeRespondente)) {
             throw new RuntimeException("Você não pode responder sua própria solicitação.");
         }
 
         if (aceitar) {
             partida.setStatus(StatusPartida.CANCELADO);
-            // Poderia limpar a notificação de jogo aqui, caso ainda exista
-            if (aceitar) {
-                partida.setStatus(StatusPartida.CANCELADO);
-            }
+            criarMensagemRespostaCancelamento(partida, timeRespondente, true);
         } else {
             partida.setStatus(StatusPartida.AGENDADO);
+            criarMensagemRespostaCancelamento(partida, timeRespondente, false);
             partida.setSolicitanteCancelamento(null);
             partida.setMotivoCancelamento(null);
         }
@@ -202,11 +230,36 @@ public class PartidaService {
             return;
         }
 
+        criarMensagemDaPartida(
+                partida,
+                desafiante,
+                texto.trim(),
+                partida.getDataSolicitacao() != null ? partida.getDataSolicitacao() : LocalDateTime.now()
+        );
+    }
+
+    private void criarMensagemCancelamento(Partida partida, Time solicitante, String motivo) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String dataDoJogo = partida.getDataHora() != null ? partida.getDataHora().format(formatter) : "data indefinida";
+        String texto = "Solicitacao de cancelamento do jogo do dia " + dataDoJogo + ". Motivo: " + motivo;
+        criarMensagemDaPartida(partida, solicitante, texto, LocalDateTime.now());
+    }
+
+    private void criarMensagemRespostaCancelamento(Partida partida, Time respondente, boolean aceitou) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String dataDoJogo = partida.getDataHora() != null ? partida.getDataHora().format(formatter) : "data indefinida";
+        String texto = aceitou
+                ? "Cancelamento do jogo do dia " + dataDoJogo + " aceito."
+                : "Cancelamento do jogo do dia " + dataDoJogo + " recusado. O jogo continua agendado.";
+        criarMensagemDaPartida(partida, respondente, texto, LocalDateTime.now());
+    }
+
+    private void criarMensagemDaPartida(Partida partida, Time remetente, String texto, LocalDateTime dataHora) {
         MensagemChat mensagem = new MensagemChat();
         mensagem.setPartida(partida);
-        mensagem.setRemetente(desafiante);
-        mensagem.setTexto(texto.trim());
-        mensagem.setDataHora(partida.getDataSolicitacao() != null ? partida.getDataSolicitacao() : LocalDateTime.now());
+        mensagem.setRemetente(remetente);
+        mensagem.setTexto(texto);
+        mensagem.setDataHora(dataHora);
         mensagem.setLida(false);
 
         mensagemChatRepository.save(mensagem);
@@ -305,6 +358,13 @@ public class PartidaService {
     
     @Transactional
     public void excluir(Long idPartida) {
+        Partida partida = partidaRepository.findById(idPartida)
+                .orElseThrow(() -> new RuntimeException("Partida nao encontrada para exclusao."));
+
+        if (partida.getStatus() != StatusPartida.PENDENTE) {
+            throw new RuntimeException("Somente convites pendentes podem ser removidos diretamente.");
+        }
+
         if (!partidaRepository.existsById(idPartida)) {
             throw new RuntimeException("Partida não encontrada para exclusão.");
         }
@@ -334,7 +394,7 @@ public class PartidaService {
     
     @Transactional
     public void cancelarConvitePorId(Long idPartida) {
-        partidaRepository.deleteById(idPartida);
+        excluir(idPartida);
     }
 
     @Transactional

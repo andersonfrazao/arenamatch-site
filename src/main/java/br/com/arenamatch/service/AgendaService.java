@@ -62,7 +62,8 @@ public class AgendaService {
                         && p.getDataHora() != null
                         && p.getDataHora().isAfter(LocalDateTime.now()));
                 boolean temPendente = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.PENDENTE);
-                boolean temCancelado = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.CANCELADO);
+                boolean temCancelado = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.CANCELADO
+                        || p.getStatus() == StatusPartida.SOLICITACAO_CANCELAMENTO);
                 boolean temPlacarPendente = doDia.stream().anyMatch(p -> p.getStatus() == StatusPartida.AGENDADO
                         && p.getDataHora() != null
                         && p.getDataHora().isBefore(LocalDateTime.now())

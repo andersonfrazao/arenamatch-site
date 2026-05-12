@@ -54,10 +54,13 @@ public class NotificacaoService {
         // 2. Busca os convites virtuais de JOGO
         listaConsolidada.addAll(buscarConvitesJogoVirtuais(idTime));
 
-        // 3. NOVA FONTE: Busca os alertas reais (PLACAR) da nova tabela
+        // 3. Busca solicitacoes virtuais de cancelamento de jogo
+        listaConsolidada.addAll(buscarCancelamentosJogoVirtuais(idTime));
+
+        // 4. NOVA FONTE: Busca os alertas reais (PLACAR) da nova tabela
         listaConsolidada.addAll(buscarNotificacoesFisicas(idTime));
 
-        // 4. Alertas virtuais de jogos realizados sem placar informado
+        // 5. Alertas virtuais de jogos realizados sem placar informado
         listaConsolidada.addAll(buscarPlacaresPendentesVirtuais(idTime));
 
         // Ordena a lista consolidada para mostrar os mais recentes primeiro (Ordem Decrescente)
@@ -116,6 +119,31 @@ public class NotificacaoService {
             
             lista.add(dto);
         }
+        return lista;
+    }
+
+    private List<NotificacaoDTO> buscarCancelamentosJogoVirtuais(Long idTime) {
+        List<NotificacaoDTO> lista = new ArrayList<>();
+        List<Partida> partidas = partidaRepository.buscarSolicitacoesCancelamentoParaOTime(idTime);
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("dd/MM/yyyy 'as' HH:mm");
+
+        for (Partida p : partidas) {
+            Time solicitante = p.getSolicitanteCancelamento();
+            LocalDateTime dataHoraJogo = horarioJogoService.resolverDataHoraMandante(p);
+            String dataHoraFormatada = dataHoraJogo != null ? dataHoraJogo.format(formatador) : "Data a definir";
+
+            NotificacaoDTO dto = new NotificacaoDTO();
+            dto.setIdReferencia(p.getId());
+            dto.setTipo("CANCELAMENTO_JOGO");
+            dto.setTitulo("Cancelamento de Jogo");
+            dto.setSubtitulo((solicitante != null ? solicitante.getNome() : "Adversario")
+                    + " solicitou o cancelamento do jogo de " + dataHoraFormatada
+                    + ". Motivo: " + p.getMotivoCancelamento());
+            dto.setDataCriacao(p.getDataSolicitacao());
+            dto.setEnviadoPorMim(false);
+            lista.add(dto);
+        }
+
         return lista;
     }
 

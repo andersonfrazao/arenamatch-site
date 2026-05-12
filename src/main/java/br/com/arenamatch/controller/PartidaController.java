@@ -59,13 +59,6 @@ public class PartidaController {
         return ResponseEntity.ok().build();
     }
     
- // Rota 1: Usada pela Agenda e pelo Sininho (onde já temos o ID da partida)
-    @DeleteMapping("/{idPartida}")
-    public ResponseEntity<Void> cancelarConvitePorId(@PathVariable Long idPartida) {
-        partidaService.cancelarConvitePorId(idPartida);
-        return ResponseEntity.noContent().build();
-    }
-
     // Rota 2: Usada pela Busca (onde sabemos apenas quem somos e quem é o adversário)
     @DeleteMapping("/cancelar/{meuTimeId}/{adversarioId}")
     public ResponseEntity<Void> cancelarConvitePorAdversario(

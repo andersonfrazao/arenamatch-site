@@ -85,7 +85,10 @@ public class NotificacaoBean implements Serializable {
 
         // Calcula quantos convites são de jogo (desafios pendentes ou placares aguardando)
         this.totalConvitesJogo = (int) listaNotificacoes.stream()
-            .filter(n -> "JOGO".equals(n.getTipo()) || "PLACAR".equals(n.getTipo()) || "PLACAR_PENDENTE".equals(n.getTipo()))
+            .filter(n -> "JOGO".equals(n.getTipo())
+                    || "CANCELAMENTO_JOGO".equals(n.getTipo())
+                    || "PLACAR".equals(n.getTipo())
+                    || "PLACAR_PENDENTE".equals(n.getTipo()))
             .count();
             
         // Calcula quantos convites são de liga
@@ -143,6 +146,36 @@ public class NotificacaoBean implements Serializable {
             }
         } catch (Exception e) {
             msgErro("Erro ao cancelar o convite enviado.");
+        }
+    }
+
+    public void aceitarCancelamentoJogo(NotificacaoDTO notif) {
+        try {
+            if ("CANCELAMENTO_JOGO".equals(notif.getTipo())) {
+                agendaClient.responderCancelamento(notif.getIdReferencia(), sessaoBean.getUsuarioLogado().getIdTime(), true);
+                msgInfo("Jogo cancelado.");
+
+                carregarNotificacoes();
+                atualizarTelaAgendaSeNecessario();
+            }
+        } catch (Exception e) {
+            log.error("Erro ao aceitar cancelamento via notificacao", e);
+            msgErro("Erro ao aceitar o cancelamento.");
+        }
+    }
+
+    public void recusarCancelamentoJogo(NotificacaoDTO notif) {
+        try {
+            if ("CANCELAMENTO_JOGO".equals(notif.getTipo())) {
+                agendaClient.responderCancelamento(notif.getIdReferencia(), sessaoBean.getUsuarioLogado().getIdTime(), false);
+                msgInfo("Cancelamento recusado. O jogo continua agendado.");
+
+                carregarNotificacoes();
+                atualizarTelaAgendaSeNecessario();
+            }
+        } catch (Exception e) {
+            log.error("Erro ao recusar cancelamento via notificacao", e);
+            msgErro("Erro ao recusar o cancelamento.");
         }
     }
 

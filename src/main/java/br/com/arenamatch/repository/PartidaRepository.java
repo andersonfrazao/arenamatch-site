@@ -48,6 +48,14 @@ public interface PartidaRepository extends JpaRepository<Partida, Long> {
  // Busca convites PENDENTES onde o time logado é Mandante (enviou) OU Visitante (recebeu)
     @Query("SELECT p FROM Partida p WHERE (p.visitante.id = :timeId OR p.mandante.id = :timeId) AND p.status = 'PENDENTE'")
     List<Partida> buscarConvitesPendentesParaOTime(@Param("timeId") Long timeId);
+
+    @Query("""
+            SELECT p FROM Partida p
+            WHERE (p.mandante.id = :timeId OR p.visitante.id = :timeId)
+            AND p.status = 'SOLICITACAO_CANCELAMENTO'
+            AND p.solicitanteCancelamento.id <> :timeId
+        """)
+    List<Partida> buscarSolicitacoesCancelamentoParaOTime(@Param("timeId") Long timeId);
     
  // =======================================================================
     // VALIDAÇÃO DE CHOQUE DE AGENDA (DOUBLE BOOKING)

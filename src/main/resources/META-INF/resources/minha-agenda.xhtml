@@ -541,7 +541,7 @@
 
                                 <h:panelGroup rendered="#{minhaAgendaBean.eventoEmCancelamento eq evento}" layout="block" styleClass="mt-4 p-3 border-round shadow-2 w-full" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
                                     <div class="text-red-400 font-bold text-sm mb-2 uppercase"><i class="fas fa-exclamation-triangle mr-1"></i> Confirmar Cancelamento</div>
-                                    <p:inputTextarea value="#{minhaAgendaBean.motivoCancelamento}" rows="2" styleClass="w-full custom-input text-sm" placeholder="Ex: Chuva forte, sem equipe..."/>
+                                    <p:inputTextarea value="#{minhaAgendaBean.motivoCancelamento}" rows="2" maxlength="350" styleClass="w-full custom-input text-sm" placeholder="Ex: Chuva forte, sem equipe..."/>
                                     <div class="flex justify-content-end gap-2 mt-3">
                                         <p:commandButton value="Voltar" action="#{minhaAgendaBean.abortarCancelamento()}" update=":formAgenda:painelDetalhes" styleClass="ui-button-secondary p-1 text-sm font-bold"/>
                                         <p:commandButton value="Enviar Pedido" action="#{minhaAgendaBean.confirmarSolicitacaoCancelamento()}" update=":formAgenda:msgs :formAgenda:painelDetalhes :formAgenda:gridDias" icon="fas fa-paper-plane" styleClass="ui-button-danger p-1 text-sm font-bold"/>
@@ -579,6 +579,33 @@
                                         </h:panelGroup>
 
                                         <h:panelGroup rendered="#{evento.tipo eq 'GAME'}">
+                                            <p:button value="Abrir chat" outcome="/chat.xhtml" icon="far fa-comments" styleClass="ui-button-secondary rounded-btn text-sm font-bold shadow-2">
+                                                <f:param name="p" value="#{evento.idPartida}" />
+                                            </p:button>
+
+                                            <p:commandButton value="Solicitar cancelamento" icon="fas fa-ban"
+                                                             action="#{minhaAgendaBean.prepararCancelamento(evento)}"
+                                                             update=":formAgenda:painelDetalhes"
+                                                             styleClass="ui-button-danger ui-button-outlined rounded-btn text-sm font-bold shadow-2"/>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{evento.tipo eq 'CANCELLATION_RECEIVED'}">
+                                            <p:commandButton value="Aceitar cancelamento" icon="fas fa-check"
+                                                             action="#{minhaAgendaBean.aceitarCancelamento(evento)}"
+                                                             update=":formAgenda @([id$=painelNotificacoesGlobais]) globalForm:msgs"
+                                                             styleClass="ui-button-danger rounded-btn text-sm font-bold shadow-2"/>
+
+                                            <p:commandButton value="Recusar" icon="fas fa-times"
+                                                             action="#{minhaAgendaBean.recusarCancelamento(evento)}"
+                                                             update=":formAgenda @([id$=painelNotificacoesGlobais]) globalForm:msgs"
+                                                             styleClass="ui-button-secondary rounded-btn text-sm font-bold shadow-2"/>
+
+                                            <p:button value="Abrir chat" outcome="/chat.xhtml" icon="far fa-comments" styleClass="ui-button-secondary rounded-btn text-sm font-bold shadow-2">
+                                                <f:param name="p" value="#{evento.idPartida}" />
+                                            </p:button>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{evento.tipo eq 'CANCELLATION_SENT'}">
                                             <p:button value="Abrir chat" outcome="/chat.xhtml" icon="far fa-comments" styleClass="ui-button-secondary rounded-btn text-sm font-bold shadow-2">
                                                 <f:param name="p" value="#{evento.idPartida}" />
                                             </p:button>

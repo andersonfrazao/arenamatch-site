@@ -385,6 +385,12 @@
                                             </div>
                                         </h:panelGroup>
 
+                                        <h:panelGroup rendered="#{notif.tipo eq 'CANCELAMENTO_JOGO'}">
+                                            <div class="text-white" style="font-weight:900;">
+                                                <i class="fas fa-ban text-red-400" style="margin-right:.4rem;"></i> #{notif.titulo}
+                                            </div>
+                                        </h:panelGroup>
+
                                         <div style="color: rgba(255,255,255,0.65); font-size: 0.9rem;">#{notif.subtitulo}</div>
 
                                         <h:panelGroup rendered="#{notif.tipo eq 'JOGO' and notif.valorTaxa ne null and notif.valorTaxa gt 0}" layout="block" styleClass="mt-2">
@@ -447,6 +453,21 @@
                                         <h:panelGroup rendered="#{notif.tipo eq 'PLACAR_PENDENTE'}">
                                             <p:button value="Ir para agenda" outcome="/minha-agenda.xhtml" icon="far fa-calendar-alt"
                                                       styleClass="ui-button-warning rounded-btn ui-button-sm shadow-2" />
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{notif.tipo eq 'CANCELAMENTO_JOGO'}">
+                                            <p:commandButton value="Aceitar" action="#{notificacaoBean.aceitarCancelamentoJogo(notif)}"
+                                                             update="painelNotificacoesGlobais globalForm:msgs"
+                                                             icon="fas fa-check" styleClass="ui-button-danger rounded-btn ui-button-sm shadow-2" />
+
+                                            <p:commandButton value="Recusar" action="#{notificacaoBean.recusarCancelamentoJogo(notif)}"
+                                                             update="painelNotificacoesGlobais globalForm:msgs"
+                                                             icon="fas fa-times" styleClass="ui-button-secondary rounded-btn ui-button-sm shadow-2" />
+
+                                            <p:button value="Chat" outcome="/chat.xhtml" icon="far fa-comments"
+                                                      styleClass="ui-button-secondary rounded-btn ui-button-sm shadow-2">
+                                                <f:param name="p" value="#{notif.idReferencia}" />
+                                            </p:button>
                                         </h:panelGroup>
 
                                     </div>
