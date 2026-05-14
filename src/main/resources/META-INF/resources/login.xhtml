@@ -17,8 +17,16 @@
             min-height: 100vh; overflow-y: auto; margin: 0; padding: 1rem;
         }
 
+        .login-form {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
         /* Mantemos o estilo visual aqui, mas o TAMANHO vamos forçar no HTML abaixo */
         .login-card { 
+            width: 90%;
+            max-width: 520px;
             padding: 40px; 
             border-radius: 16px; 
             position: relative; 
@@ -53,14 +61,19 @@
             box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
         }
         .ui-input-icon-left > i { color: #94a3b8; }
+
+        body .ui-password,
+        body .ui-password input {
+            width: 100%;
+        }
     </style>
 </h:head>
 
 <h:body>
-    <h:form>
+    <h:form styleClass="login-form">
         <p:growl id="msgs" showDetail="true" />
 
-        <div class="login-card" style="max-width: 600px !important; width: 90%;">
+        <div class="login-card">
             
             <div class="text-center mb-5">
                 <div class="text-3xl font-bold text-neon" style="font-size: 2rem;">
@@ -97,7 +110,7 @@
             </div>
 
             <div class="text-center mt-4 text-xs text-gray-500 font-bold">
-                Vers&#227;o: Beta 0.01
+                Vers&#227;o: Beta 0.02
             </div>
 
         </div>
