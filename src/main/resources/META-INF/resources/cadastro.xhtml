@@ -72,6 +72,42 @@
                 background: #0ea5e9 !important; color: #fff !important; border-color: #0ea5e9 !important;
             }
             body .week-selector .ui-button:hover { border-color: #0ea5e9 !important; color: #fff !important; }
+
+            body .mando-campo-radio {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+            }
+            body .mando-campo-radio tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            body .mando-campo-radio tr {
+                display: block;
+            }
+            body .mando-campo-radio td {
+                display: inline-flex;
+                align-items: center;
+                padding: 0 6px 0 0;
+            }
+            body .mando-campo-radio .ui-radiobutton {
+                margin-right: 8px;
+            }
+            body .mando-campo-radio label {
+                color: #fff;
+                margin-right: 0;
+                line-height: 1.25;
+            }
+            body .agenda-table-prime {
+                min-width: 0 !important;
+            }
+            body .agenda-table-prime .ui-column-title {
+                color: #94a3b8;
+                font-weight: 800;
+                margin-right: 8px;
+            }
             
             /* Ajustes Mobile */
             @media (max-width: 600px) {
@@ -79,6 +115,31 @@
                 .full-width { grid-column: span 1; }
                 .wizard-topbar { justify-content: center; }
                 .steps-container { flex-wrap: wrap; }
+                .wizard-card { width: 100%; margin: 10px auto; }
+                .wizard-card > div,
+                .wizard-card [style*="padding: 30px 40px"] {
+                    padding-left: 16px !important;
+                    padding-right: 16px !important;
+                }
+                body .week-selector .ui-button {
+                    flex: 0 0 calc(25% - 8px);
+                }
+                body .agenda-table-prime .ui-datatable-reflow .ui-datatable-data td,
+                body .agenda-table-prime.ui-datatable-reflow .ui-datatable-data td {
+                    display: flex !important;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 12px;
+                    text-align: right;
+                    border-color: rgba(255,255,255,0.08) !important;
+                }
+                body .agenda-table-prime.ui-datatable-reflow .ui-datatable-data tr {
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                    background: rgba(15, 23, 42, 0.45);
+                    margin-bottom: 10px;
+                    overflow: hidden;
+                }
             }
             .ui-wizard-navbar { display: none; }
         </style>
@@ -273,6 +334,7 @@
                                     <label class="form-label">Mando de Campo</label>
                                     <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid #334155;">
                                         <p:selectOneRadio value="#{cadastroBean.dto.mandoCampo}" unselectable="true" style="color:#fff;"
+                                                          layout="pageDirection" styleClass="mando-campo-radio"
                                                           required="true" requiredMessage="Selecione se é Mandante ou Visitante.">
                                             <f:selectItem itemValue="true" itemLabel="Mandante" />
                                             <f:selectItem itemValue="false" itemLabel="Visitante" />
@@ -357,7 +419,8 @@
                                 <p:dataTable id="tabelaAgenda" value="#{cadastroBean.agenda}" var="item" 
                                              emptyMessage="Nenhum horário adicionado ainda."
                                              styleClass="agenda-table-prime"
-                                             rowStyleClass="bg-transparent text-white">
+                                             rowStyleClass="bg-transparent text-white"
+                                             reflow="true">
                                     
                                     <p:column headerText="Categoria" style="background:transparent; color:#fff; border-color:#334155">
                                         <h:outputText value="#{item.categoria.descricao}" style="font-weight:bold"/>
