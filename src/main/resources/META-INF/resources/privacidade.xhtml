@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<h:head>
+    <title>Arena Match - Termos e Privacidade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <h:outputStylesheet library="css" name="styles.css" />
+    <link href="https://unpkg.com/primeflex@3.1.2/primeflex.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 1rem;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .public-page {
+            width: 100%;
+            max-width: 980px;
+            margin: 2rem auto;
+        }
+
+        .public-card {
+            background: rgba(30, 41, 59, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .public-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #0ea5e9, #22d3ee);
+        }
+
+        .public-header {
+            padding: 2rem 2.5rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        .public-brand {
+            color: #0ea5e9;
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .public-brand span {
+            color: #fff;
+        }
+
+        .public-content {
+            padding: 2rem 2.5rem 2.5rem;
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-size: .98rem;
+        }
+
+        .public-content h1 {
+            margin: 0 0 1rem;
+            color: #fff;
+            font-size: 1.45rem;
+            line-height: 1.25;
+        }
+
+        .public-content h2 {
+            margin: 2rem 0 .75rem;
+            color: #fff;
+            font-size: 1rem;
+            letter-spacing: 0;
+        }
+
+        .public-content p {
+            margin: 0 0 .85rem;
+        }
+
+        .public-content strong {
+            color: #f8fafc;
+        }
+
+        .public-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.25rem 2.5rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            background: rgba(15, 23, 42, 0.55);
+            flex-wrap: wrap;
+        }
+
+        .public-link {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            color: #0ea5e9;
+            text-decoration: none;
+            font-weight: 800;
+        }
+
+        .public-link:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: .75rem;
+            }
+
+            .public-page {
+                margin: .75rem auto;
+            }
+
+            .public-header,
+            .public-content,
+            .public-actions {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+
+            .public-brand {
+                font-size: 1.45rem;
+            }
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <main class="public-page">
+        <section class="public-card">
+            <header class="public-header">
+                <div class="public-brand">
+                    <i class="fas fa-trophy"></i>
+                    ARENA <span>MATCH</span>
+                </div>
+            </header>
+
+            <article class="public-content">
+                <h1>TERMOS DE USO E POLÍTICA DE PRIVACIDADE - ARENA MATCH</h1>
+                <p>Estes Termos de Uso regulam o acesso e a utilização do sistema Arena Match, hospedado no domínio arenamatch.app.br, de propriedade da <strong>JCS Info LTDA ME</strong>. Ao criar uma conta e utilizar a plataforma, você concorda expressamente com as regras abaixo.</p>
+
+                <h2>1. OBJETIVO DO SISTEMA</h2>
+                <p>O Arena Match é uma plataforma de licenciamento de software desenvolvida para facilitar o agendamento de partidas, a organização de times e a busca por oponentes. A <strong>JCS Info LTDA ME</strong> fornece apenas a ferramenta tecnológica (software), não tendo qualquer participação na organização física, segurança ou execução dos eventos esportivos.</p>
+
+                <h2>2. PLANOS DE ASSINATURA E ACESSO</h2>
+                <p>A plataforma opera sob um modelo de licença de uso, dividida nas seguintes modalidades:</p>
+                <p><strong>Plano Básico:</strong> Acesso gratuito por tempo indeterminado, porém com recursos limitados dentro do sistema.</p>
+                <p><strong>Plano Trial:</strong> Acesso gratuito a todos os recursos da plataforma (completos) por um período pré-determinado de experimentação. Após o término do período, a conta retornará ao Plano Básico caso não haja adesão ao Plano Pró.</p>
+                <p><strong>Plano Pró:</strong> Acesso integral e irrestrito a todos os recursos do sistema mediante pagamento de mensalidade.</p>
+                <p>As cobranças do Plano Pró (quando ativadas) serão realizadas de forma antecipada via Cartão de Crédito ou Pix.</p>
+
+                <h2>3. INADIMPLÊNCIA E CANCELAMENTO</h2>
+                <p><strong>Inadimplência:</strong> O não pagamento da mensalidade do Plano Pró na data de vencimento acarretará o "downgrade" imediato e automático da conta para o Plano Básico, restringindo o acesso aos recursos premium.</p>
+                <p><strong>Cancelamento:</strong> O usuário poderá cancelar sua assinatura a qualquer momento entrando em contato através do canal "Fale Conosco" via e-mail, disponível dentro do próprio sistema.</p>
+                <p><strong>Reembolso:</strong> Não há política de reembolso para valores já pagos. Ao cancelar, o usuário deixará de ser cobrado nos ciclos seguintes e sua conta passará para o Plano Básico.</p>
+
+                <h2>4. REGRAS DE CONDUTA E USO DO CHAT</h2>
+                <p><strong>Exclusividade dos Usuários:</strong> A interação, a linguagem utilizada e o comportamento (inclusive práticas desportivas e fair play) são de inteira responsabilidade dos usuários. O sistema não atua como mediador de conflitos entre times ou jogadores.</p>
+                <p><strong>Resolução de Conflitos:</strong> Em caso de conduta ofensiva ou antidesportiva por parte de um adversário, a recomendação da plataforma é que os usuários utilizem o bom senso e não voltem a agendar partidas com o infrator.</p>
+                <p><strong>Bloqueio de Chat:</strong> Como medida de segurança e moderação automática, o chat disponibilizado na plataforma para comunicação entre os times será bloqueado e desativado imediatamente após o término da partida agendada.</p>
+                <p><strong>Banimento:</strong> A <strong>JCS Info LTDA ME</strong> reserva-se o direito de banir permanentemente contas em casos de extrema necessidade, como uso da plataforma para fins ilícitos, fraudes ou violações graves à legislação brasileira.</p>
+
+                <h2>5. PRIVACIDADE E USO DE DADOS (LGPD)</h2>
+                <p><strong>Coleta de Dados:</strong> A plataforma coleta e armazena em banco de dados as informações pessoais fornecidas no cadastro pelos representantes e organizadores dos times para o funcionamento do sistema.</p>
+                <p><strong>Processamento Financeiro:</strong> Atualmente, a plataforma não utiliza sistemas externos para processamento de pagamentos. Quando implementados, os dados financeiros estarão sujeitos aos termos das respectivas operadoras (gateways de pagamento).</p>
+                <p><strong>Compartilhamento e Monetização de Dados:</strong> Ao aceitar estes termos, o usuário compreende e consente que a <strong>JCS Info LTDA ME</strong> poderá compilar, anonimizar ou, mediante consentimento específico, comercializar dados da base de usuários para empresas parceiras interessadas no ecossistema esportivo, respeitando rigorosamente os limites e direitos previstos na Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p>
+
+                <h2>6. DISPOSIÇÕES GERAIS</h2>
+                <p>A <strong>JCS Info LTDA ME</strong> poderá alterar estes Termos de Uso a qualquer momento, notificando os usuários sobre as atualizações. O uso contínuo do sistema após a notificação constituirá a aceitação dos novos termos.</p>
+                <p>Fica eleito o foro da comarca da sede da <strong>JCS Info LTDA ME</strong> para dirimir quaisquer dúvidas ou controvérsias oriundas deste documento.</p>
+                <p><strong>[ ] Li e aceito os Termos de Uso e a Política de Privacidade.</strong></p>
+            </article>
+
+            <footer class="public-actions">
+                <a href="login.xhtml" class="public-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar ao login
+                </a>
+                <a href="cadastro.xhtml" class="public-link">
+                    Criar conta
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </footer>
+        </section>
+    </main>
+</h:body>
+</html>

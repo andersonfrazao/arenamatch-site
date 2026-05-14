@@ -85,6 +85,8 @@
 
         <h:form id="formCadastro">
             <p:growl id="msgs" showDetail="true" life="5000" />
+            <h:inputHidden id="geoLat" value="#{cadastroBean.dto.latitude}" />
+            <h:inputHidden id="geoLon" value="#{cadastroBean.dto.longitude}" />
 
             <div class="wizard-card">
                 
@@ -205,16 +207,30 @@
 
                                 <div class="form-group full-width">
                                     <label class="form-label">CEP</label>
+                                    <p:remoteCommand name="usarLocalizacaoAtual"
+                                                     action="#{cadastroBean.buscarEnderecoPorLocalizacao}"
+                                                     process="@this :formCadastro:geoLat :formCadastro:geoLon"
+                                                     update="inputCep painelEndereco msgs" />
                                     <div style="display:flex; gap:10px;">
                                         <p:inputMask id="inputCep" value="#{cadastroBean.dto.cep}" mask="99999-999" 
                                                      styleClass="custom-input" 
                                                      required="true" 
                                                      requiredMessage="O CEP é obrigatório."
-                                                     placeholder="00000-000"/>
+                                                     placeholder="00000-000"
+                                                     onchange="limparLocalizacaoAtual();"/>
                                         <p:commandButton icon="fas fa-search" action="#{cadastroBean.buscarCep}" 
                                                          process="@this inputCep" update="painelEndereco msgs"
                                                          style="background:#334155; border:1px solid #475569; color:#fff; border-radius:8px; width:50px; height: 46px"/>
                                     </div>
+                                    <p:commandButton value="Usar localização atual"
+                                                     icon="fas fa-location-crosshairs"
+                                                     type="button"
+                                                     onclick="obterLocalizacaoAtual();"
+                                                     styleClass="mt-2"
+                                                     style="width:100%; background:rgba(34,197,94,0.14); border:1px solid rgba(34,197,94,0.45); color:#86efac; padding:10px; border-radius:8px; font-weight:700;"/>
+                                    <small style="color:#94a3b8; display:block; margin-top:6px;">
+                                        No celular, o navegador pedirá permissão para usar sua localização.
+                                    </small>
                                 </div>
 
                                 <h:panelGroup id="painelEndereco" layout="block" styleClass="input-grid full-width p-0 gap-0" style="display: contents;">
@@ -367,7 +383,7 @@
                                 <p:selectBooleanCheckbox id="aceiteTermos" value="#{cadastroBean.dto.termosAceitos}" widgetVar="chkTermos" style="pointer-events: none;" />
                                 
                                 <p:outputLabel styleClass="ml-3 text-gray-300 text-sm">
-                                    Para continuar, você precisa ler e aceitar os <p:commandLink value="Termos e Condições de Uso" type="button" onclick="abrirTermos();" styleClass="text-blue-400 font-bold no-underline hover:underline"/>
+                                    Para continuar, você precisa ler e aceitar os <p:commandLink value="Termos de Uso e Política de Privacidade" type="button" onclick="abrirTermos();" styleClass="text-blue-400 font-bold no-underline hover:underline"/>
                                 </p:outputLabel>
                             </h:panelGroup>
 
@@ -398,27 +414,46 @@
                 </h:panelGroup>
             </div>
 
-			<p:dialog header="Termos e Condições de Uso" widgetVar="dialogTermos" modal="true" width="90%" fitViewport="true" responsive="true" style="max-width: 600px;" styleClass="bg-bluegray-900 text-white shadow-6 border-round-xl" closable="false">
+			<p:dialog header="Termos de Uso e Política de Privacidade" widgetVar="dialogTermos" modal="true" width="90%" fitViewport="true" responsive="true" style="max-width: 600px;" styleClass="bg-bluegray-900 text-white shadow-6 border-round-xl" closable="false">
                 
                 <div id="boxTextosTermo" onscroll="verificarScrollTermos()" style="max-height: 55vh; overflow-y: auto; padding-right: 10px;" class="line-height-3 text-gray-300 text-sm font-family-sans">
                     <div style="background: rgba(14, 165, 233, 0.1); border-left: 4px solid #0ea5e9; padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #e2e8f0;">
                         <i class="fas fa-info-circle mr-2"></i> Role o texto até o final para habilitar o botão de aceite.
                     </div>
 
-                    <h4 class="text-white font-bold mb-2">1. Aceitação dos Termos e Natureza do Serviço</h4>
-                    <p class="mb-3">Bem-vindo ao Arena Match. Este serviço é operado pela <strong>JCS Info LTDA ME</strong>, inscrita no CNPJ sob o nº <strong>[COLOQUE SEU CNPJ AQUI]</strong>. Ao criar sua conta, você concorda expressamente com as regras descritas neste documento.</p>
+                    <h3 class="text-white font-bold mb-3">TERMOS DE USO E POLÍTICA DE PRIVACIDADE - ARENA MATCH</h3>
+                    <p class="mb-3">Estes Termos de Uso regulam o acesso e a utilização do sistema Arena Match, hospedado no domínio arenamatch.app.br, de propriedade da <strong>JCS Info LTDA ME</strong>. Ao criar uma conta e utilizar a plataforma, você concorda expressamente com as regras abaixo.</p>
 
-                    <h4 class="text-white font-bold mb-2">2. Fase Beta e Limitações do Sistema</h4>
-                    <p class="mb-3">O Arena Match encontra-se atualmente em fase "Beta" (versão de testes). Isso significa que a plataforma está em constante desenvolvimento e pode apresentar instabilidades, lentidão ou funções temporariamente indisponíveis. A <strong>JCS Info LTDA ME</strong> não garante a disponibilidade ininterrupta do serviço nesta fase.</p>
+                    <h4 class="text-white font-bold mb-2">1. OBJETIVO DO SISTEMA</h4>
+                    <p class="mb-3">O Arena Match é uma plataforma de licenciamento de software desenvolvida para facilitar o agendamento de partidas, a organização de times e a busca por oponentes. A <strong>JCS Info LTDA ME</strong> fornece apenas a ferramenta tecnológica (software), não tendo qualquer participação na organização física, segurança ou execução dos eventos esportivos.</p>
 
-                    <h4 class="text-white font-bold mb-2">3. Isenção de Responsabilidade (O Risco do Jogo)</h4>
-                    <p class="mb-3">O Arena Match atua exclusivamente como uma ferramenta tecnológica de comunicação e agendamento. Atualmente, <strong>não possuímos um sistema de reputação, verificação de identidade ou avaliação técnica e comportamental dos times cadastrados</strong>. A decisão de agendar e comparecer a uma partida é de inteira responsabilidade dos representantes das equipes envolvidas. A <strong>JCS Info LTDA ME</strong> está isenta de qualquer responsabilidade por acidentes, lesões, desentendimentos, não comparecimento (W.O.), inadimplência de taxas de campo ou qualquer dano moral ou material ocorrido antes, durante ou após os eventos esportivos agendados pela plataforma.</p>
+                    <h4 class="text-white font-bold mb-2">2. PLANOS DE ASSINATURA E ACESSO</h4>
+                    <p class="mb-2">A plataforma opera sob um modelo de licença de uso, dividida nas seguintes modalidades:</p>
+                    <p class="mb-2"><strong>Plano Básico:</strong> Acesso gratuito por tempo indeterminado, porém com recursos limitados dentro do sistema.</p>
+                    <p class="mb-2"><strong>Plano Trial:</strong> Acesso gratuito a todos os recursos da plataforma (completos) por um período pré-determinado de experimentação. Após o término do período, a conta retornará ao Plano Básico caso não haja adesão ao Plano Pró.</p>
+                    <p class="mb-3"><strong>Plano Pró:</strong> Acesso integral e irrestrito a todos os recursos do sistema mediante pagamento de mensalidade.</p>
+                    <p class="mb-3">As cobranças do Plano Pró (quando ativadas) serão realizadas de forma antecipada via Cartão de Crédito ou Pix.</p>
 
-                    <h4 class="text-white font-bold mb-2">4. Alterações e Futura Monetização</h4>
-                    <p class="mb-3">Nesta fase Beta, o acesso às ferramentas básicas de agendamento é concedido de forma gratuita. No entanto, a <strong>JCS Info LTDA ME</strong> reserva-se o direito de, no futuro e mediante aviso prévio, introduzir planos de assinatura, taxas de serviço ou alterar as funcionalidades gratuitas para modelos pagos. O usuário será notificado e poderá optar por continuar ou encerrar sua conta quando a política de preços for implementada.</p>
-                    
-                    <h4 class="text-white font-bold mb-2">5. Conduta e Banimento</h4>
-                    <p>Ao utilizar nosso chat e sistema de convites, o usuário compromete-se a manter uma postura respeitosa. É estritamente proibido o uso de linguagem abusiva, ameaças ou organização de atividades ilícitas. O descumprimento resultará no banimento imediato e permanente da conta, sem aviso prévio por parte da <strong>JCS Info LTDA ME</strong>.</p>
+                    <h4 class="text-white font-bold mb-2">3. INADIMPLÊNCIA E CANCELAMENTO</h4>
+                    <p class="mb-2"><strong>Inadimplência:</strong> O não pagamento da mensalidade do Plano Pró na data de vencimento acarretará o "downgrade" imediato e automático da conta para o Plano Básico, restringindo o acesso aos recursos premium.</p>
+                    <p class="mb-2"><strong>Cancelamento:</strong> O usuário poderá cancelar sua assinatura a qualquer momento entrando em contato através do canal "Fale Conosco" via e-mail, disponível dentro do próprio sistema.</p>
+                    <p class="mb-3"><strong>Reembolso:</strong> Não há política de reembolso para valores já pagos. Ao cancelar, o usuário deixará de ser cobrado nos ciclos seguintes e sua conta passará para o Plano Básico.</p>
+
+                    <h4 class="text-white font-bold mb-2">4. REGRAS DE CONDUTA E USO DO CHAT</h4>
+                    <p class="mb-2"><strong>Exclusividade dos Usuários:</strong> A interação, a linguagem utilizada e o comportamento (inclusive práticas desportivas e fair play) são de inteira responsabilidade dos usuários. O sistema não atua como mediador de conflitos entre times ou jogadores.</p>
+                    <p class="mb-2"><strong>Resolução de Conflitos:</strong> Em caso de conduta ofensiva ou antidesportiva por parte de um adversário, a recomendação da plataforma é que os usuários utilizem o bom senso e não voltem a agendar partidas com o infrator.</p>
+                    <p class="mb-2"><strong>Bloqueio de Chat:</strong> Como medida de segurança e moderação automática, o chat disponibilizado na plataforma para comunicação entre os times será bloqueado e desativado imediatamente após o término da partida agendada.</p>
+                    <p class="mb-3"><strong>Banimento:</strong> A <strong>JCS Info LTDA ME</strong> reserva-se o direito de banir permanentemente contas em casos de extrema necessidade, como uso da plataforma para fins ilícitos, fraudes ou violações graves à legislação brasileira.</p>
+
+                    <h4 class="text-white font-bold mb-2">5. PRIVACIDADE E USO DE DADOS (LGPD)</h4>
+                    <p class="mb-2"><strong>Coleta de Dados:</strong> A plataforma coleta e armazena em banco de dados as informações pessoais fornecidas no cadastro pelos representantes e organizadores dos times para o funcionamento do sistema.</p>
+                    <p class="mb-2"><strong>Processamento Financeiro:</strong> Atualmente, a plataforma não utiliza sistemas externos para processamento de pagamentos. Quando implementados, os dados financeiros estarão sujeitos aos termos das respectivas operadoras (gateways de pagamento).</p>
+                    <p class="mb-3"><strong>Compartilhamento e Monetização de Dados:</strong> Ao aceitar estes termos, o usuário compreende e consente que a <strong>JCS Info LTDA ME</strong> poderá compilar, anonimizar ou, mediante consentimento específico, comercializar dados da base de usuários para empresas parceiras interessadas no ecossistema esportivo, respeitando rigorosamente os limites e direitos previstos na Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p>
+
+                    <h4 class="text-white font-bold mb-2">6. DISPOSIÇÕES GERAIS</h4>
+                    <p class="mb-3">A <strong>JCS Info LTDA ME</strong> poderá alterar estes Termos de Uso a qualquer momento, notificando os usuários sobre as atualizações. O uso contínuo do sistema após a notificação constituirá a aceitação dos novos termos.</p>
+                    <p class="mb-3">Fica eleito o foro da comarca da sede da <strong>JCS Info LTDA ME</strong> para dirimir quaisquer dúvidas ou controvérsias oriundas deste documento.</p>
+                    <p><strong>[ ] Li e aceito os Termos de Uso e a Política de Privacidade.</strong></p>
                     
                     <br/><br/><br/>
                     <div class="text-center text-gray-500 italic">Fim do documento.</div>
@@ -434,6 +469,34 @@
             </p:dialog>
 
             <script>
+                function obterLocalizacaoAtual() {
+                    if (!navigator.geolocation) {
+                        alert('Seu navegador não permite usar a localização atual.');
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        function(posicao) {
+                            document.getElementById('formCadastro:geoLat').value = posicao.coords.latitude;
+                            document.getElementById('formCadastro:geoLon').value = posicao.coords.longitude;
+                            usarLocalizacaoAtual();
+                        },
+                        function() {
+                            alert('Não foi possível obter sua localização. Verifique a permissão do navegador.');
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 12000,
+                            maximumAge: 60000
+                        }
+                    );
+                }
+
+                function limparLocalizacaoAtual() {
+                    document.getElementById('formCadastro:geoLat').value = '';
+                    document.getElementById('formCadastro:geoLon').value = '';
+                }
+
                 function abrirTermos() {
                     document.getElementById('boxTextosTermo').scrollTop = 0;
                     PF('btnAceitar').disable();
@@ -442,36 +505,12 @@
 
                 function verificarScrollTermos() {
                     var caixa = document.getElementById('boxTextosTermo');
-                    // Aumentei a tolerância de -2 para -10 pixels, caso a pessoa use Zoom no navegador
                     if (caixa.scrollTop + caixa.clientHeight >= caixa.scrollHeight - 10) {
-                        PF('btnAceitar').enable(); 
+                        PF('btnAceitar').enable();
                     }
                 }
 
                 function confirmarAceite() {
-                    PF('chkTermos').check();
-                    PF('dialogTermos').hide();
-                }
-            </script>
-
-            <script>
-                function abrirTermos() {
-                    // Reseta o scroll e o botão toda vez que abrir
-                    document.getElementById('boxTextosTermo').scrollTop = 0;
-                    PF('btnAceitar').disable();
-                    PF('dialogTermos').show();
-                }
-
-                function verificarScrollTermos() {
-                    var caixa = document.getElementById('boxTextosTermo');
-                    // Verifica se o scroll atingiu o final (dando uma margem de segurança de 2 pixels)
-                    if (caixa.scrollTop + caixa.clientHeight >= caixa.scrollHeight - 2) {
-                        PF('btnAceitar').enable(); // Liga o botão verde!
-                    }
-                }
-
-                function confirmarAceite() {
-                    // Marca a caixinha de forma invisível via JavaScript do PrimeFaces
                     PF('chkTermos').check();
                     PF('dialogTermos').hide();
                 }

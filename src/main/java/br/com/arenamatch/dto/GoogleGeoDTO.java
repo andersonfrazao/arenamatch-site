@@ -1,5 +1,6 @@
 package br.com.arenamatch.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.util.List;
 
@@ -10,7 +11,20 @@ public class GoogleGeoDTO {
 
     @Data
     public static class Result {
+        @JsonProperty("address_components")
+        private List<AddressComponent> addressComponents;
         private Geometry geometry;
+    }
+
+    @Data
+    public static class AddressComponent {
+        @JsonProperty("long_name")
+        private String longName;
+
+        @JsonProperty("short_name")
+        private String shortName;
+
+        private List<String> types;
     }
 
     @Data

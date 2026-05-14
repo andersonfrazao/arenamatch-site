@@ -10,6 +10,7 @@ import org.primefaces.event.FlowEvent;
 import org.springframework.beans.factory.annotation.Value;
 
 import br.com.arenamatch.client.CadastroClient;
+import br.com.arenamatch.client.GeoClient;
 import br.com.arenamatch.client.ViaCepClient;
 import br.com.arenamatch.dto.CadastroDTO;
 import br.com.arenamatch.dto.DisponibilidadeDTO;
@@ -48,6 +49,7 @@ public class CadastroBean implements Serializable {
     @Getter @Setter private List<DisponibilidadeDTO> agenda = new ArrayList<>();
 
     @Inject private ViaCepClient viaCepClient;
+    @Inject private GeoClient geoClient;
     @Inject private CadastroClient cadastroClient;
     @Inject private CpfValidator cpfValidator;
 
@@ -198,11 +200,48 @@ public class CadastroBean implements Serializable {
                     dto.setCidade(end.getLocalidade());
                     dto.setUf(end.getUf());
                     dto.setRegiao(end.getRegiao());
+                    dto.setLatitude(null);
+                    dto.setLongitude(null);
                 } else {
                     msgErro("CEP não encontrado.");
                 }
             }
         }
+    }
+
+    public void buscarEnderecoPorLocalizacao() {
+        if (dto.getLatitude() == null || dto.getLongitude() == null) {
+            msgErro("Não foi possível obter sua localização atual.");
+            return;
+        }
+
+        EnderecoDTO enderecoGoogle = geoClient.buscarEnderecoPorCoordenadas(dto.getLatitude(), dto.getLongitude());
+        if (enderecoGoogle == null) {
+            msgErro("Não foi possível converter sua localização em endereço.");
+            return;
+        }
+
+        String cepLimpo = enderecoGoogle.getCep() != null ? enderecoGoogle.getCep().replaceAll("\\D", "") : "";
+        if (cepLimpo.length() == 8) {
+            EnderecoDTO enderecoViaCep = viaCepClient.buscarEndereco(cepLimpo);
+            if (enderecoViaCep != null && !enderecoViaCep.isErro()) {
+                preencherEndereco(enderecoViaCep);
+                msgInfo("Localização atual usada para preencher o endereço.");
+                return;
+            }
+        }
+
+        preencherEndereco(enderecoGoogle);
+        msgInfo("Localização atual usada para preencher o endereço.");
+    }
+
+    private void preencherEndereco(EnderecoDTO end) {
+        dto.setCep(end.getCep());
+        dto.setLogradouro(end.getLogradouro());
+        dto.setBairro(end.getBairro());
+        dto.setCidade(end.getLocalidade());
+        dto.setUf(end.getUf());
+        dto.setRegiao(end.getRegiao());
     }
 
     public String finalizar() {

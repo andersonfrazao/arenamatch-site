@@ -22,6 +22,8 @@ public class CadastroDTO {
     private String regiao;
     private String cidade;
     private String uf;
+    private Double latitude;
+    private Double longitude;
     private Double valorTaxa;
     private Boolean mandoCampo; 
     private Boolean termosAceitos;

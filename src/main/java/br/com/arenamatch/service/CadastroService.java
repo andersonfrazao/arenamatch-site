@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.arenamatch.client.GeoClient;
-import br.com.arenamatch.client.GoogleMapsGeoClient;
 import br.com.arenamatch.dto.CadastroDTO;
 import br.com.arenamatch.dto.CategoriaDTO;
 import br.com.arenamatch.dto.DisponibilidadeDTO;
@@ -39,7 +38,6 @@ public class CadastroService {
     @Autowired private AgendaRepository agendaRepo;
     @Autowired private GeoClient geoClient;
     @Autowired private PasswordEncoder passwordEncoder; // Injeta o BCrypt configurado
-    @Autowired private GoogleMapsGeoClient googleMapsGeoClient;
     @Autowired private PartidaRepository partidaRepo;
     @Autowired private EmailService emailService;
     @Autowired private CpfValidator cpfValidator;
@@ -117,18 +115,7 @@ public class CadastroService {
 	        time.setValorTaxa(dto.getValorTaxa());
 	        
 	        
-	        String enderecoBusca = dto.getLogradouro() + ", " + dto.getNumero() + " - " + dto.getCidade();
-	        var geoLoc = googleMapsGeoClient.getLatLong(enderecoBusca);
-	        System.out.println("lat-end: "+geoLoc.getLat());
-	        System.out.println("long-end: "+geoLoc.getLat());
-	        
-	        GeoDTO coords = geoClient.buscarCoordenadas(limparMascara(dto.getCep()));
-	        System.out.println("lat-cep: "+coords.getLat());
-	        System.out.println("long-cep: "+coords.getLat());
-	        if (coords != null) {
-	            time.setLatitude(coords.getLat());
-	            time.setLongitude(coords.getLon());
-	        }
+	        preencherCoordenadas(time, dto);
 	        
 	        timeRepo.save(time);
 	        
@@ -235,15 +222,7 @@ public class CadastroService {
             time.setRegiao(dto.getRegiao());
             time.setValorTaxa(dto.getValorTaxa());
 
-            // Recalcula a Geolocalização do novo endereço
-            String enderecoBusca = dto.getLogradouro() + ", " + dto.getNumero() + " - " + dto.getCidade();
-            var geoLoc = googleMapsGeoClient.getLatLong(enderecoBusca);
-            
-            GeoDTO coords = geoClient.buscarCoordenadas(limparMascara(dto.getCep()));
-            if (coords != null) {
-                time.setLatitude(coords.getLat());
-                // time.setLongitude(coords.getLon()); // Ajuste se necessário para setLongitude
-            }
+            preencherCoordenadas(time, dto);
             
             timeRepo.save(time);
 
@@ -313,6 +292,8 @@ public class CadastroService {
         dto.setRegiao(time.getRegiao());
         dto.setValorTaxa(time.getValorTaxa());
         dto.setMandoCampo(time.isMandoCampo());
+        dto.setLatitude(time.getLatitude());
+        dto.setLongitude(time.getLongitude());
 
         // Dados da Agenda
      // Dados da Agenda
@@ -336,6 +317,20 @@ public class CadastroService {
         dto.setDisponibilidades(disponibilidades);
 
         return dto;
+    }
+
+    private void preencherCoordenadas(Time time, CadastroDTO dto) {
+        if (dto.getLatitude() != null && dto.getLongitude() != null) {
+            time.setLatitude(dto.getLatitude());
+            time.setLongitude(dto.getLongitude());
+            return;
+        }
+
+        GeoDTO coords = geoClient.buscarCoordenadas(limparMascara(dto.getCep()));
+        if (coords != null) {
+            time.setLatitude(coords.getLat());
+            time.setLongitude(coords.getLon());
+        }
     }
     
     private void validarHorariosMandante(CadastroDTO dto) {
